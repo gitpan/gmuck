@@ -1,6 +1,6 @@
 package HTML::GMUCK;
 
-# $Id: GMUCK.pm,v 1.19 2003/09/04 21:29:20 scop Exp $
+# $Id: GMUCK.pm,v 1.20 2004/08/07 23:40:44 scop Exp $
 
 use strict;
 
@@ -13,293 +13,22 @@ use vars qw($VERSION $Tag_End $Tag_Start $Non_Tag_End
             @Length_Attrs @Fixed_Attrs);
 
 use Carp qw(carp);
-use HTML::Tagset 3.03 ();
 
 no warnings 'utf8';
 
 BEGIN
 {
 
-  $VERSION = sprintf("%d.%02d", q$Revision: 1.19 $ =~ /(\d+)\.(\d+)/);
-
-  # We can use Regex::PreSuf for a small runtime speed gain.
-  local *presuf;
-  eval {
-    local $SIG{__DIE__};
-    require Regex::PreSuf;
-    *presuf = \&Regex::PreSuf::presuf;
-  };
-  *presuf = sub (@) { return join('|', sort(@_)); } if $@;
-
-  sub make_re (@) {
-    return '\b(?:' . presuf(@_) . ')\b';
-  }
-
+  $VERSION = sprintf("%d.%02d", q$Revision: 1.20 $ =~ /(\d+)\.(\d+)/);
 
   # --- Preload regexps.
-
-
-  # Matches a ">" that is not preceded by "-" (to protect Perl's "->").
-  $Tag_End = qr/(?<!-)>/o;
-
-  # Matches a non-">" char or a "->", $Tag_End negated.
-  $Non_Tag_End = qr/(?:[^>]|(?<=-)>)/o;
-
-  # This is used in optimizations.  Elements are from <a> to <var>.
-  # We also allow end tags, hence the "/".
-  $Tag_Start = qr/<\/?[a-vA-V]/o;
 
   my $tmp = '';
   my %tmp = ();
 
-  foreach my $attr (values(%HTML::Tagset::linkElements)) {
-    %tmp = (%tmp, map { $_ => 1 } @$attr) if (ref($attr) eq 'ARRAY');
-    $tmp{xmlns} = 1;
-    $tmp{profile} = 1;
-  }
-  $URI_Attrs = make_re(keys(%tmp));
-
-
-  %tmp = %HTML::Tagset::optionalEndTag;
-  $tmp{option} = 1;
-  delete($tmp{p}); # This just causes too much bogus.
-  $End_Omit = make_re(keys(%tmp));
-
-
-  # isKnown contains some entries like "~pi" etc, hence the grep
-  $All_Elems = make_re(grep(!/^~/, keys %HTML::Tagset::isKnown));
-
-
-  %tmp = ();
-  foreach my $attr (values(%HTML::Tagset::boolean_attr)) {
-    if (ref($attr) eq 'HASH') {
-      foreach my $a (keys %$attr) {
-        $tmp{$a} = 1;
-      }
-    } elsif (! ref($attr)) {
-      $tmp{$attr} = 1;
-    }
-    $tmp{noresize} = 1;
-    $tmp{readonly} = 1;
-    $tmp{declare}  = 1;
-    $tmp{defer}    = 1;
-  }
-  $Min_Attrs = make_re(keys %tmp);
-
-
-  # HTML elements that have forbidden end tag.
-  $Min_Elems = make_re(qw(area base basefont br col embed frame hr img input
-                          isindex link meta param));
-
-
-  # This contains elements that are commonly left empty, but require end tag.
-  $Compat_Elems = make_re(qw(p script textarea));
-
-
-  # RFC 2046 says x-foo top-level types are allowed, but discouraged...
-  $tmp = make_re(qw(application audio image message multipart text video)),
-  $MIME_Type = qr/^$tmp\/\w+?[-\w\.]+?\w+\b$/i;
-
-
-  # Elements that have attributes with multiple (comma-separated) MIME types:
-  #   form, input: accept
-  # Parens in these regexps:
-  #   1: element, 2: attribute, 3:first quote,
-  #   4: value (including possible end quote), 5: value
-  $tmp =
-    '<(%s)\b\s??' . $Non_Tag_End .
-    '*?\s(%s)=(\\\?["\'])?((.*?)(?:\3|\s|' . $Tag_End . '))';
-  @MIME_Attrs =
-    map { qr/$_/i }
-    ( sprintf($tmp, make_re(qw(a link param style script)), 'type'),
-      sprintf($tmp, 'object',                               '(?:code)type'),
-      sprintf($tmp, 'form',                                 'enctype'),
-    );
-
-
-  # All known attributes.
-  $All_Attrs =
-    make_re(qw(abbr accept accept-charset accesskey action align alink alt
-               archive axis background bgcolor border cellpadding cellspacing
-               char charoff charset checked cite class classid clear code
-               codebase codetype color cols colspan compact content coords
-               data datetime declare defer dir disabled enctype face for frame
-               frameborder headers height href hreflang hspace http-equiv id
-               ismap label lang language leftmargin link longdesc marginheight
-               marginwidth maxlength media method multiple name nohref
-               noresize noshade nowrap object onblur onchange onclick
-               ondblclick onfocus onkeydown onkeypress onkeyup onload
-               onmousedown onmousemove onmouseout onmouseover onmouseup
-               onreset onselect onsubmit onunload profile prompt readonly rel
-               rev rows rowspan rules scheme scope scrolling selected shape
-               size span src standby start style summary tabindex target text
-               title topmargin type usemap valign value valuetype version
-               vlink vspace width wrap));
-
-
-  # This has some special cases which are handled by code later.
-  # See _attributes()
-
-  # Note that $tmp is also used in %Depr_Attrs...
-  $tmp = '<((%s)\b\s??.*?(?:\s(%s)=|' . $Tag_End . '))';
-
-  %tmp =
-    ( action  => sprintf($tmp, 'form',                       'action' ),
-      alt     => sprintf($tmp, make_re(qw(area img)),        'alt'    ),
-      cols    => sprintf($tmp, 'textarea',                   'cols'   ),
-      content => sprintf($tmp, 'meta',                       'content'),
-      dir     => sprintf($tmp, 'bdo',                        'dir'    ),
-      height  => sprintf($tmp, 'applet',                     'height' ),
-      href    => sprintf($tmp, 'base',                       'href'   ),
-      id      => sprintf($tmp, 'map',                        'id'     ), # *
-      label   => sprintf($tmp, 'optgroup',                   'label'  ),
-      name    => sprintf($tmp, make_re(qw(input map param)), 'name'   ), # *
-      rows    => sprintf($tmp, 'textarea',                   'rows'   ),
-      size    => sprintf($tmp, 'basefont',                   'size'   ),
-      src     => sprintf($tmp, 'img',                        'src'    ),
-      type    => sprintf($tmp, make_re(qw(script style)),    'type'   ),
-      width   => sprintf($tmp, 'applet',                     'width'  ),
-    );
-  %Req_Attrs = map { $_ => qr/$tmp{$_}/i } keys(%tmp);
-
-
-  # Deprecated attributes as of HTML 4.01, not including deprecated elements
-  # and their attributes.
-
-  # Note that we're using the same $tmp as %Req_Attrs...
-
-  @Depr_Attrs =
-    map { qr/$_/i }
-    ( sprintf($tmp,
-              make_re(qw(caption iframe img input object legend
-                         table hr div h1 h2 h3 h4 h5 h6 p)), 'align' ),
-      sprintf($tmp, 'body',    make_re(qw(alink background link text vlink))),
-      sprintf($tmp, 'hr',                       make_re(qw(noshade width))),
-      sprintf($tmp, make_re(qw(img object)),make_re(qw(border hspace vspace))),
-      sprintf($tmp,
-              make_re(qw(td th)), make_re(qw(bgcolor height nowrap width))),
-      sprintf($tmp, make_re(qw(ol ul)),         'type'),
-      sprintf($tmp, make_re(qw(body table tr)), 'bgcolor'),
-      sprintf($tmp, make_re(qw(dl ol ul)),      'compact'),
-      sprintf($tmp, 'ol',                       'start'),
-      sprintf($tmp, 'li',                       'value'),
-      sprintf($tmp, 'html',                     'version'),
-      sprintf($tmp, 'br',                       'clear'),
-      sprintf($tmp, 'script',                   'language'),
-      sprintf($tmp, 'li',                       'type'),
-      sprintf($tmp, 'pre',                      'width'),
-    );
-
-
-  # Deprecated elements as of HTML 4.01.
-  $Depr_Elems =
-    make_re(qw(applet basefont center dir font isindex menu s strike u));
-
-
-  # Attributes whose value is an integer, from HTML 4.01 and XHTML 1.0.
-  # Couple of special cases here, handled in _attributes().
-
-  # Note that this $tmp is used also in @Length_Attrs below.
-  $tmp = '<((%s)\b\s??[^>]*?\s(%s)=(["\'])([^>]+?)\4)';
-
-  @Int_Attrs =
-    map { qr/$_/i }
-    (
-     # NUMBER/Number
-     sprintf($tmp, 'textarea',                 make_re(qw(cols rows))),
-     sprintf($tmp, make_re(qw(td th)),         make_re(qw(colspan rowspan))),
-     sprintf($tmp, 'input',                   'maxlength'),
-     sprintf($tmp, 'select',                  'size'),
-     sprintf($tmp, make_re(qw(col colgroup)), 'span'),
-     sprintf($tmp, 'ol',                      'start'),
-     sprintf($tmp,
-             make_re(qw(a area button input object select textarea)),
-             'tabindex'),
-     sprintf($tmp, 'li',                      'value'),
-     sprintf($tmp, 'pre',                     'width'),
-     # Pixels
-     sprintf($tmp, make_re(qw(applet img)),    make_re(qw(hspace vspace))),
-     sprintf($tmp,
-             make_re(qw(frame iframe)), make_re(qw(marginheight marginwidth))),
-     sprintf($tmp, 'hr',                      'size'),
-     sprintf($tmp, make_re(qw(img table)),    'border'),          # img: HTML 4
-     sprintf($tmp, 'object',                make_re(qw(border hspace vspace))),
-     sprintf($tmp, make_re(qw(td th)),  make_re(qw(width height))), # XHTML 1.0
-    );
-
-  # Attributes whose value is %Length, from HTML 4.01 and XHTML 1.0.
-  # Couple of special cases here, handled in _attributes().
-
-  # Note that we're using the same $tmp as in @Int_Attrs above.
-
-  @Length_Attrs =
-    map { qr/$_/i }
-    ( sprintf($tmp, 'table', make_re(qw(cellpadding cellspacing))),
-      sprintf($tmp,
-              make_re(qw(col colgroup tbody td tfoot th thead tr)), 'charoff'),
-      sprintf($tmp, make_re(qw(applet iframe img object)), 'height'),
-      sprintf($tmp, make_re(qw(applet hr iframe img object table)), 'width'),
-      sprintf($tmp, make_re(qw(td th)), make_re(qw(width height))),    # HTML 4
-      sprintf($tmp, 'img', 'border'),                               # XHTML 1.0
-    );
-
-  # Attributes that have a fixed set of values, from HTML 4.01.
-  # Note that we're using the same $tmp as in @Int_Attrs above.
-
-  %tmp =
-    ( sprintf($tmp, make_re(qw(a area)), 'shape') =>
-      [ qw(rect circle poly default) ],
-      sprintf($tmp, make_re(qw(applet iframe img input object)), 'align') =>
-      [ qw(top middle bottom left right) ],
-      sprintf($tmp, 'area', 'nohref') => [ 'nohref' ],
-      sprintf($tmp, 'br', 'clear') => [ qw(left all right none) ],
-      sprintf($tmp, 'button', 'type') => [ qw(button submit reset) ],
-      sprintf($tmp, make_re(qw(button input option optgroup select textarea)),
-              'disabled') => [ 'disabled' ],
-      sprintf($tmp, make_re(qw(caption legend)), 'align') =>
-      [ qw(top bottom left right) ],
-      sprintf($tmp, make_re(qw(col colgroup tbody td tfoot th thead tr)),
-              'align') => [ qw(left center right justify char) ],
-      sprintf($tmp, make_re(qw(col colgroup tbody td tfoot th thead tr)),
-              'valign') => [ qw(top middle bottom baseline) ],
-      sprintf($tmp, make_re(qw(dir dl menu ol ul)), 'compact') => [ 'compact'],
-      sprintf($tmp, make_re(qw(div h1 h2 h3 h4 h5 h6 p)), 'align') =>
-      [ qw(left center right justify) ],
-      sprintf($tmp, 'form', 'method') => [ qw(get post) ],
-      sprintf($tmp, 'frame', 'noresize') => [ 'noresize' ],
-      sprintf($tmp, make_re(qw(frame iframe)), 'frameborder') => [ qw(0 1) ],
-      sprintf($tmp, make_re(qw(frame iframe)), 'scrolling') =>
-      [ qw(yes no auto) ],
-      sprintf($tmp, 'hr', 'align') => [ qw(left center justify) ],
-      sprintf($tmp, 'hr', 'noshade') => [ 'noshade' ],
-      sprintf($tmp, make_re(qw(img input)), 'ismap') => [ 'ismap' ],
-      sprintf($tmp, 'input', 'checked') => [ 'checked' ],
-      sprintf($tmp, make_re(qw(input textarea)), 'readonly') =>
-      [ qw(readonly) ],
-      sprintf($tmp, 'li', 'type') => [ qw(disc square circle 1 a A i I) ],
-      sprintf($tmp, 'object', 'declare') => [ 'declare' ],
-      sprintf($tmp, 'ol', 'type') => [ qw(1 a A i I) ],
-      sprintf($tmp, 'param', 'valuetype') => [ qw(DATA REF OBJECT) ],
-      sprintf($tmp, 'script', 'defer') => [ 'defer' ],
-      sprintf($tmp, 'table', 'align') => [ qw(left center right) ],
-      sprintf($tmp, 'table', 'frame') =>
-      [ qw(void above below hsides lhs rhs vsides box border) ],
-      sprintf($tmp, 'table', 'rules') => [ qw(none groups rows cols all) ],
-      sprintf($tmp, make_re(qw(td th)), 'nowrap') => [ qw(nowrap) ],
-      sprintf($tmp, make_re(qw(td th)), 'scope') =>
-      [ qw(row col rowgroup colgroup) ],
-      sprintf($tmp, 'ul', 'type') => [ qw(disc square circle) ],
-      sprintf($tmp, 'input', 'type') =>
-      [qw(text password checkbox radio submit reset file hidden image button)],
-      # --- these are XHTML only ---
-      sprintf($tmp, 'html', 'xmlns') => [ 'http://www.w3.org/1999/xhtml' ],
-      sprintf($tmp, make_re(qw(pre script style)),'xml:space') => ['preserve'],
-    );
-
-  @Fixed_Attrs = ();
-  while (my ($re, $vals) = each(%tmp)) {
-    my $v = make_re(@$vals);
-    push(@Fixed_Attrs, [ qr/$re/i, qr/$v/i, join('|', @$vals) ]);
+  if (! do 'HTML/GMUCK/regexps.pl') {
+    my $err = $! || $@;
+    die "Error reading HTML/GMUCK/regexps.pl: $err";
   }
 
 }
@@ -1031,11 +760,9 @@ sub quote ($;$)
   return $this->{_quote};
 }
 
-sub full_version (;$)
+sub full_version ()
 {
-  return "HTML::GMUCK $VERSION (HTML::Tagset " .
-    ($HTML::Tagset::VERSION || 'N/A') . ", Regex::PreSuf " .
-      ($Regex::PreSuf::VERSION || 'N/A') . ")";
+  return "HTML::GMUCK $VERSION";
 }
 
 # ---------- Utility methods ------------------------------------------------ #

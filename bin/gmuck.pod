@@ -1,4 +1,4 @@
-$Id: gmuck.pod,v 1.7 2003/09/04 18:46:37 scop Exp $
+$Id: gmuck.pod,v 1.9 2004/08/07 23:31:29 scop Exp $
 
 =head1 NAME
 
@@ -146,11 +146,11 @@ L<HTML::GMUCK>, L<Getopt::Long>
 
 =head1 AUTHOR
 
-Ville SkyttE<228> E<lt>ville.skytta at iki.fiE<gt>
+Ville Skyttä E<lt>ville.skytta at iki.fiE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2003 Ville SkyttE<228>.  All rights reserved.
+Copyright (C) 2001-2004 Ville Skyttä.  All rights reserved.
 
 This program is free software, you can redistribute it and/or modify
 it under the terms of The Artistic License or the GNU General Public

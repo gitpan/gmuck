@@ -1,4 +1,4 @@
-$Id: GMUCK.pod,v 1.5 2003/09/04 18:46:37 scop Exp $
+$Id: GMUCK.pod,v 1.7 2004/08/07 23:31:29 scop Exp $
 
 =head1 NAME
 
@@ -228,7 +228,7 @@ being unregistered, and a recommendation to use "application/x-javascript"
 instead.  However, Microsoft Internet Explorer 6.0 has been reported not
 to execute "application/x-javascript" scripts.  If you are concerned about
 this, just use "text/javascript" and ignore the error.  See
-E<lt>URL:http://www.robinlionheart.com/stds/html4/scripts.htmlE<gt>
+E<lt>http://www.robinlionheart.com/stds/html4/scripts.htmlE<gt>
 for a good explanation about this.  Earlier versions of IE don't seem to
 be affected.
 
@@ -251,26 +251,26 @@ See F<TODO> in the distribution for an up to date list.
 L<gmuck(1)>
 
 The gmuck homepage,
- E<lt>URL:http://gmuck.sourceforge.net/E<gt>
+ E<lt>http://gmuck.sourceforge.net/E<gt>
 
-The W3C HTML Validation Service
- E<lt>URL:http://validator.w3.org/E<gt>
+The W3C MarkUp Validation Service
+ E<lt>http://validator.w3.org/E<gt>
 
 WDG HTML Validator
- E<lt>URL:http://www.htmlhelp.com/tools/validator/E<gt>
+ E<lt>http://www.htmlhelp.com/tools/validator/E<gt>
 
 Site Valet
- E<lt>URL:http://valet.htmlhelp.com/E<gt>
+ E<lt>http://valet.htmlhelp.com/E<gt>
 
 L<HTML::Validator>
 
 =head1 AUTHOR
 
-Ville SkyttE<228> E<lt>ville.skytta at iki.fiE<gt>
+Ville Skyttä E<lt>ville.skytta at iki.fiE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2003 Ville SkyttE<228>.  All rights reserved.
+Copyright (C) 2001-2004 Ville Skyttä.  All rights reserved.
 
 This program is free software, you can redistribute it and/or modify
 it under the terms of The Artistic License or the GNU General Public

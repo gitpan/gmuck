@@ -1,3 +1,23 @@
+2004-08-08  Ville Skyttä  <ville.skytta at iki.fi>
+
+	* Release 1.10.
+
+	*: Split regexp generation into genregexps.PL which is used to
+	generate lib/HTML/GMUCK/regexps.pl in order to avoid
+	Regexp::PreSuf and HTML::Tagset dependencies for users.
+
+	* bin/gmuck.pod, lib/HTML/GMUCK.pod: Convert to UTF-8.
+
+	* SIGNATURE: New.
+
+2004-03-24  Ville Skyttä  <ville.skytta at iki.fi>
+
+	* Makefile.PL (dist): Make files in dist tarball owned by root.
+
+2003-09-05  Ville Skyttä  <ville.skytta at iki.fi>
+
+	* etc/gmuck.spec: Fix required perl version.
+
 2003-09-04  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* Release 1.09.

@@ -1,45 +1,22 @@
-# $Id: Makefile.PL,v 1.8 2003/09/04 19:48:57 scop Exp $
+# $Id: Makefile.PL,v 1.10 2004/08/07 23:40:22 scop Exp $
 
+require 5.006;
 use ExtUtils::MakeMaker;
-
-$| = 1;
-
-print "\n";
-
-print "Checking for Regex::PreSuf...";
-eval {
-  require Regex::PreSuf;
-};
-if ($@) {
-  print " not found\n";
-  print <<EOT;
-  Regex::PreSuf is _not_ required.
-  But if you had it installed, most gmuck tests would run slightly faster.
-EOT
-  sleep(2);
-} else {
-  print "ok\n";
-}
-
-print "\n";
 
 WriteMakefile(
               NAME              => 'gmuck',
               VERSION_FROM      => 'bin/gmuck',
               PREREQ_PM         => { 'Getopt::Long' => 0,
                                      'Carp'         => 0,
-                                     'HTML::Tagset' => 3.03,
                                    },
               EXE_FILES         => ['bin/gmuck'],
               MAN1PODS          => { 'bin/gmuck.pod' =>
                                      '$(INST_MAN1DIR)/gmuck.$(MAN1EXT)',
                                    },
-              PL_FILES          => {}, # avoid installing Build.PL
-              ($] >= 5.005 ?
-               (ABSTRACT_FROM   => 'bin/gmuck.pod',
-                AUTHOR    => 'Ville Skyttä <ville.skytta at iki.fi>') : ()),
-
-              dist              => { COMPRESS => 'gzip -9f', SUFFIX => 'gz' },
+              PL_FILES          => {}, # avoid installing *.PL
+              ABSTRACT_FROM     => 'bin/gmuck.pod',
+              AUTHOR            => 'Ville Skyttä <ville.skytta at iki.fi>',
+              dist              => { TARFLAGS => '--owner=0 --group=0 -cvf' },
              );
 
 # Stuff below happily stolen from libwww-perl :)
