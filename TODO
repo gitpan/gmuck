@@ -1,0 +1,12 @@
+$Id: TODO,v 1.3 2002/04/07 12:54:52 scop Exp $
+
+TODO items for gmuck, in no particular order.
+
+o Enable tests.
+o Implement more-than-one-line checks, in order to provide more context.
+o Better XML checks.
+o Non-nitpick mode?
+o WWW pointers for reported errors.
+o Deprecated attributes checks should maybe contain also non-standard ones
+  and other common troublesome ones, like <body margin(width|height)>,
+  <table height>.

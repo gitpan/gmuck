@@ -1,0 +1,45 @@
+2002-04-07  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* Released 1.03 (under the dist name "gmuck").
+
+	* bin/gmuck:
+	New option, --verbose.
+	$VERSION no longer comes from the CVS version.
+
+	* lib/HTML/GMUCK.pm:
+	(&full_version): New.
+	(&_deprecated, @Depr_Attrs): Check for deprecated attributes.
+	($MIME_Types): Fixed the badly broken regexp.
+
+	* bin/gmuck.pod: Documented --verbose, other tunings.
+
+	* lib/HTML/GMUCK.pod:
+	Documented full_version(), expanded check descriptions a bit.
+
+	* TODO:	Brought up to date.
+
+	* README: Tuning.
+
+	* Makefile.PL:
+	Changed dist name to gmuck.
+	Version from bin/gmuck.
+	Abstract from bin/gmuck.pod.
+	
+2002-04-06  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* lib/HTML/GMUCK.pm:
+	(&tab_width): Ensure tab width gets set to an integer.
+	(&_attributes): Fixed variable interpolation bug in message.
+	(&_deprecated): Skip deprecated element checks in XML mode.
+	
+	* README:
+	Corrected requirements (HTML::Tagset _is_ needed).
+	
+	* README, bin/gmuck.pod, lib/HTML/GMUCK.pod:
+	Copyright and URL tuning.
+
+	* t/008tabwidth.t: New file.
+
+2002-04-05  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* Released 1.02, initial public release.
