@@ -7,10 +7,9 @@ Welcome to gmuck!
   quick checks and in situations where validation of the actual markup
   is troublesome.
 
-  gmuck is a line-oriented tool.  Because of that and other fundamental
-  reasons, it will not check the structure of your markup, but makes an
-  attempt to report syntactical errors as well as provides some
-  lint-like capabilities.
+  gmuck is a line-oriented tool.  Because of that, its structural
+  checking capabilities are limited, but it makes an attempt to report
+  syntactical errors as well as provides some lint-like features.
 
   There gmuck distribution consists of the "HTML::GMUCK" module and the
   "gmuck" command line interface to it.
@@ -76,4 +75,4 @@ COPYRIGHT
   License ("GPL") as published by the Free Software Foundation;
   either version 2 of the GPL, or (at your option) any later version.
 
-$Id: README,v 1.6 2002/04/09 21:35:40 scop Exp $
+$Id: README,v 1.7 2002/05/18 07:33:47 scop Exp $

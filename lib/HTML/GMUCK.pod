@@ -1,4 +1,4 @@
-$Id: GMUCK.pod,v 1.2 2002/04/20 18:05:08 scop Exp $
+$Id: GMUCK.pod,v 1.3 2002/07/07 09:56:49 scop Exp $
 
 =head1 NAME
 
@@ -220,6 +220,17 @@ You can also call this as a function.
 =head1 EXPORT
 
 Nothing at the moment.
+
+=head1 CAVEATS
+
+You may get errors about the JavaScript media type "text/javascript"
+being unregistered, and a recommendation to use "application/x-javascript"
+instead.  However, Microsoft Internet Explorer 6.0 has been reported not
+to execute "application/x-javascript" scripts.  If you are concerned about
+this, just use "text/javascript" and ignore the error.  See
+E<lt>URL:http://www.robinlionheart.com/stds/html4/scripts.htmlE<gt>
+for a good explanation about this.  Earlier versions of IE don't seem to
+be affected.
 
 =head1 BUGS
 

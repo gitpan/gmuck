@@ -1,8 +1,8 @@
-# $Id: gmuck.spec,v 1.5 2002/05/12 16:51:06 scop Exp $
+# $Id: gmuck.spec,v 1.7 2002/07/07 10:03:30 scop Exp $
 
 Summary:        gmuck, the Generated MarkUp ChecKer
 Name:           gmuck
-Version:        1.06
+Version:        1.07
 Release:        1
 License:        Artistic / GPL
 Group:          Development/Tools
@@ -32,7 +32,7 @@ make OPTIMIZE="$RPM_OPT_FLAGS"
 rm -rf $RPM_BUILD_ROOT
 eval `perl '-V:installarchlib'`
 mkdir -p $RPM_BUILD_ROOT/$installarchlib
-make PREFIX=$RPM_BUILD_ROOT%{_prefix} install
+%makeinstall PREFIX=$RPM_BUILD_ROOT%{_prefix}
 
 [ -x /usr/lib/rpm/brp-compress ] && /usr/lib/rpm/brp-compress
 
@@ -52,5 +52,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 
 %changelog
-* Wed Apr 17 2002 Ville Skyttä <ville . skytta @ iki . fi>
+* Sun Jul  7 2002 Ville Skyttä <ville.skytta at iki.fi> 1.07-1
+- Release 1.07.
+
+* Wed Apr 17 2002 Ville Skyttä <ville.skytta at iki.fi>
 - First spec file.

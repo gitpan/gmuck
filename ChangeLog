@@ -1,13 +1,24 @@
-2002-05-17  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-07-07  Ville Skyttä  <ville.skytta at iki.fi>
+
+	* Release 1.07.
+
+	* lib/HTML/GMUCK.pm (_mime_types), lib/HTML/GMUCK.pod (CAVEATS):
+	Add information about MSIE 6.0 and "application/x-javascript".
+
+2002-05-18  Ville Skyttä  <ville.skytta at iki.fi>
+
+	* README, bin/gmuck.pod: Rephrased description.
+
+2002-05-17  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* Released 1.06.
 
-2002-05-12  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-05-12  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* lib/HTML/GMUCK.pm (&_attributes):
 	Fixed required attribute check, simplified special case code.
 
-2002-04-30  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-30  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* Released 1.05.
 
@@ -15,7 +26,7 @@
 	Add input->type, html->xmlns and pre,script,style->xml:space
 	to fixed attribute checks.
 
-2002-04-21  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-21  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* lib/HTML/GMUCK.pm (&_attributes):
 	Check number, length and fixed attribute values.
@@ -25,7 +36,7 @@
 
 	* TODO: Brought up to date.
 
-2002-04-20  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-20  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* bin/gmuck, bin/gmuck.pod:
 	New option, --[no]minattributes.
@@ -36,7 +47,7 @@
 
 	* bin/gmuck, lib/HTML/GMUCK.pm: Added function prototypes.
 
-2002-04-18  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-18  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* bin/gmuck, bin/gmuck.pod:
 	New option, --[no]binary.
@@ -44,7 +55,7 @@
 	* bin/gmuck:
 	Output warnings of dirs and binaries if in verbose mode.
 
-2002-04-17  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-17  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* lib/HTML/GMUCK.pm:
 	($Tag_Start): Allow also end tags, like "</foo".
@@ -52,12 +63,12 @@
 
 	* t/010elem.t, etc/gmuck.spec: New files.
 
-2002-04-11  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-11  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* lib/HTML/GMUCK.pm:
 	Tuned error messages, readability enhancements.
 
-2002-04-09  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-09  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* Released 1.04.
 	
@@ -65,7 +76,7 @@
 	($Non_Tag_End, @MIME_Types, &_attributes, &_doctype):
 	Better detection of (non-)tag-ending ">".
 
-2002-04-08  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-08  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* lib/HTML/GMUCK.pm:
 	($Tag_End): Had some historical backslashing, fixed.
@@ -76,7 +87,7 @@
 
 	* t/009attr.t: New file.
 
-2002-04-07  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-07  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* Released 1.03 (under the dist name "gmuck").
 
@@ -103,7 +114,7 @@
 	Version from bin/gmuck.
 	Abstract from bin/gmuck.pod.
 	
-2002-04-06  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-06  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* lib/HTML/GMUCK.pm:
 	(&tab_width): Ensure tab width gets set to an integer.
@@ -118,6 +129,6 @@
 
 	* t/008tabwidth.t: New file.
 
-2002-04-05  Ville Skyttä  <ville . skytta @ iki . fi>
+2002-04-05  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* Released 1.02, initial public release.

@@ -1,6 +1,6 @@
 package HTML::GMUCK;
 
-# $Id: GMUCK.pm,v 1.15 2002/05/12 16:55:47 scop Exp $
+# $Id: GMUCK.pm,v 1.16 2002/07/07 09:56:49 scop Exp $
 
 use strict;
 
@@ -18,7 +18,7 @@ use HTML::Tagset 3.03 ();
 BEGIN
 {
 
-  $VERSION = sprintf("%d.%02d", q$Revision: 1.15 $ =~ /(\d+)\.(\d+)/);
+  $VERSION = sprintf("%d.%02d", q$Revision: 1.16 $ =~ /(\d+)\.(\d+)/);
 
   # We can use Regex::PreSuf for a small runtime speed gain.
   local *presuf;
@@ -647,7 +647,7 @@ sub _mime_types ($$)
   my @errors = ();
   my $msg = 'bad media type: "%s"';
   my $jsmsg =
-    'unregistered media type: "%s", use application/x-javascript instead';
+    'unregistered media type: "%s", use application/x-javascript instead (see also CAVEATS in the HTML::GMUCK manual page)';
 
   foreach my $re (@MIME_Attrs) {
 
