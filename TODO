@@ -1,4 +1,4 @@
-$Id: TODO,v 1.3 2002/04/07 12:54:52 scop Exp $
+$Id: TODO,v 1.5 2002/04/09 19:47:14 scop Exp $
 
 TODO items for gmuck, in no particular order.
 
@@ -10,3 +10,9 @@ o WWW pointers for reported errors.
 o Deprecated attributes checks should maybe contain also non-standard ones
   and other common troublesome ones, like <body margin(width|height)>,
   <table height>.
+o Check the wicked piece of regexp in the start of the
+  "non-lowercase attribute" test in &_attributes, and adapt it to others.
+o Check for attributes with fixed values, for example:
+  noshade="noshade", method="(get|post)",
+  (input)
+   type="(text|password|checkbox|radio|submit|reset|file|hidden|image|button)"

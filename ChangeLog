@@ -1,3 +1,22 @@
+2002-04-09  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* Released 1.04.
+	
+	* lib/HTML/GMUCK.pm:
+	($Non_Tag_End, @MIME_Types, &_attributes, &_doctype):
+	Better detection of (non-)tag-ending ">".
+
+2002-04-08  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* lib/HTML/GMUCK.pm:
+	($Tag_End): Had some historical backslashing, fixed.
+	(&_elements): Fixed column number output in 'missing " />"'.
+	($End_Omit): Removed the <p> element, it causes much bogus output.
+	(@MIME_Attrs, %Req_Attrs, @Depr_Attrs, &_attributes, &_entities):
+	We need whitespace before attribute name, \b is not enough.
+
+	* t/009attr.t: New file.
+
 2002-04-07  Ville Skyttä  <ville . skytta @ iki . fi>
 
 	* Released 1.03 (under the dist name "gmuck").

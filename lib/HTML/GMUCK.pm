@@ -1,12 +1,13 @@
 package HTML::GMUCK;
 
-# $Id: GMUCK.pm,v 1.4 2002/04/07 14:12:42 scop Exp $
+# $Id: GMUCK.pm,v 1.6 2002/04/09 19:53:08 scop Exp $
 
 use strict;
 
 require 5.00503;
 
-use vars qw($VERSION $Tag_End $Tag_Start $URI_Attrs $End_Omit $All_Elems
+use vars qw($VERSION $Tag_End $Tag_Start $Non_Tag_End
+            $URI_Attrs $End_Omit $All_Elems
             $Min_Elems $Compat_Elems $Min_Attrs $MIME_Type @MIME_Attrs
             %Req_Attrs $All_Attrs $Depr_Elems @Depr_Attrs);
 
@@ -16,7 +17,7 @@ use HTML::Tagset 3.03 ();
 BEGIN
 {
 
-  $VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
+  $VERSION = sprintf("%d.%02d", q$Revision: 1.6 $ =~ /(\d+)\.(\d+)/);
 
   # We can use Regex::PreSuf for a small runtime speed gain.
   local *presuf;
@@ -35,7 +36,11 @@ BEGIN
   # --- Preload regexps.
 
 
-  $Tag_End = qr/(?<!\\-)>/o; # Protect Perl's "->".
+  # Matches a ">" that is not preceded by "-" (to protect Perl's "->").
+  $Tag_End = qr/(?<!-)>/o;
+
+  # Matches a non-">" char or a "->", $Tag_End negated.
+  $Non_Tag_End = qr/(?:[^>]|(?<=-)>)/o;
 
   # This is used in optimizations.  Elements are from <a> to <var>.
   $Tag_Start = qr/<[a-vA-V]/o;
@@ -53,6 +58,7 @@ BEGIN
 
   %tmp = %HTML::Tagset::optionalEndTag;
   $tmp{option} = 1;
+  delete($tmp{p}); # This just causes too much bogus.
   $End_Omit = make_re(keys(%tmp));
 
 
@@ -96,7 +102,9 @@ BEGIN
   # Parens in these regexps:
   #   1: element, 2: attribute, 3:first quote,
   #   4: value (including possible end quote), 5: value
-  $tmp = '<(%s)\s[^>]*\b(%s)=(\\\?["\'])?((.*?)(?:\3|\s|' . $Tag_End . '))';
+  $tmp =
+    '<(%s)\b\s??' . $Non_Tag_End .
+    '*?\s(%s)=(\\\?["\'])?((.*?)(?:\3|\s|' . $Tag_End . '))';
   @MIME_Attrs =
     map { qr/$_/i }
     ( sprintf($tmp, make_re(qw(a link param style script)), 'type'),
@@ -129,7 +137,7 @@ BEGIN
   # See _attributes()
 
   # Note that $tmp is also used in %Depr_Attrs...
-  $tmp = '<((%s)\s.*?(?:(%s)=|' . $Tag_End . '))';
+  $tmp = '<((%s)\b\s??.*?(?:\s(%s)=|' . $Tag_End . '))';
 
   %tmp =
     ( action  => sprintf($tmp, 'form',                       'action' ),
@@ -303,7 +311,7 @@ sub _attributes
 
   # BUG: Does not catch non-lowercase minimized attributes, like CHECKED.
   while ($line =~ /
-         (?:(?<=[\w\"\'])\s+)
+         (?:^\s*|(?<=[\w\"\'])\s+)
          (
           ($All_Attrs)
           =
@@ -351,8 +359,9 @@ sub _attributes
 
   # Not doing this check inside <>'s would result in too much bogus.
   while ($line =~ /
-         <.+?
-         [^.] # Protect eg. "foo.checked" javascript constructs.
+         <
+         $Non_Tag_End+?
+         \s
          (
           ($Min_Attrs)
           ([=\s]|$Tag_End)
@@ -384,9 +393,11 @@ sub _attributes
            # Special cases:
 
            # input/@name not required if input/@type = "submit" or "reset".
+           # Note that the default type for input is text...
            ($el eq 'input' &&
             # TODO: this is crap
-            $line !~ /\btype=(\\?[\"\'])?(submi|rese)t\b/io)
+            $line !~ /\stype=(\\?[\"\'])?(submi|rese)t\b/io
+           )
 
            ||
 
@@ -529,10 +540,10 @@ sub _elements
          <                # TODO: Do we really need to see a known
          ($All_Elems)     #       element here?
          .*?
-         (\s?\\?\/?$Tag_End)
+         (\s?\\?\/?($Tag_End))
          /giox) {
-    my ($el, $end) = ($1, $2);
-    my $pos = $this->_pos(pos($line) - length($end));
+    my ($el, $end, $m) = ($1, $2);
+    my $pos = $this->_pos($line, pos($line) - length($3));
     if ($end =~ m|/>$|o) {
       if ($this->{_xhtml} &&
           $el !~ /^$Compat_Elems$/io &&   # These don't apply here, see later.
@@ -616,6 +627,7 @@ sub _entities
   my $msg = 'unterminated entity: %s';
 
   while ($line =~ /
+         (?:^|\s)
          ($URI_Attrs)
          =
          (
@@ -654,7 +666,7 @@ sub _doctype
   my ($this, $line) = @_;
   my @errors = ();
 
-  while ($line =~ /<!((DOCTYPE)\s+([^>]+)>)/gio) {
+  while ($line =~ /<!((DOCTYPE)\s+($Non_Tag_End+)>)/gio) {
     my ($pos, $dt, $rest) = (pos($line) - length($1), $2, $3);
     if ($dt ne "DOCTYPE") {
       push(@errors, { col  => $this->_pos($line, $pos),
