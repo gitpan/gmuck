@@ -1,18 +1,21 @@
-# $Id: gmuck.spec,v 1.7 2002/07/07 10:03:30 scop Exp $
+# $Id: gmuck.spec,v 1.12 2003/09/04 21:27:51 scop Exp $
 
-Summary:        gmuck, the Generated MarkUp ChecKer
 Name:           gmuck
-Version:        1.07
+Version:        1.09
 Release:        1
-License:        Artistic / GPL
+Epoch:          0
+Summary:        gmuck, the Generated MarkUp ChecKer
+
+License:        GPL or Artistic
 Group:          Development/Tools
-Vendor:         Ville Skytt‰ <ville.skytta@iki.fi>
+Vendor:         Ville Skytt√§ <ville.skytta@iki.fi>
 URL:            http://gmuck.sourceforge.net/
-Source:         http://download.sourceforge.net/gmuck/%{name}-%{version}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-root
-Requires:       perl >= 0:5.00503, perl-HTML-Tagset >= 3.03
-BuildRequires:  perl >= 0:5.00503, perl-HTML-Tagset >= 3.03
+Source:         http://download.sourceforge.net/gmuck/gmuck-1.09.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
 BuildArch:      noarch
+BuildRequires:  perl >= 0:5.00503, perl-HTML-Tagset >= 3.03
+Requires:       perl >= 0:5.00503, perl-HTML-Tagset >= 3.03
 
 %description
 gmuck assists you in generating valid (X)HTML by examining the source code
@@ -20,40 +23,38 @@ that generates it.  It is not a replacement for real validation tools, but
 is handy in quick checks and in situations where validation of the actual
 markup is troublesome.
 
+
 %prep
 %setup -q
 
+
 %build
-CFLAGS="$RPM_OPT_FLAGS" perl Makefile.PL
+CFLAGS="$RPM_OPT_FLAGS" perl Makefile.PL INSTALLDIRS=vendor
 make OPTIMIZE="$RPM_OPT_FLAGS"
 # not just yet: make test
 
+
 %install
 rm -rf $RPM_BUILD_ROOT
-eval `perl '-V:installarchlib'`
-mkdir -p $RPM_BUILD_ROOT/$installarchlib
-%makeinstall PREFIX=$RPM_BUILD_ROOT%{_prefix}
+make install PERL_INSTALL_ROOT=$RPM_BUILD_ROOT
+find $RPM_BUILD_ROOT -type f -a \( -name perllocal.pod -o -name .packlist \
+  -o \( -name '*.bs' -a -empty \) \) -exec rm -f {} ';'
+find $RPM_BUILD_ROOT -type d -depth -exec rmdir {} 2>/dev/null ';'
+chmod -R u+w $RPM_BUILD_ROOT/*
 
-[ -x /usr/lib/rpm/brp-compress ] && /usr/lib/rpm/brp-compress
-
-find $RPM_BUILD_ROOT%{_prefix} -type f -print | \
-	sed "s@^$RPM_BUILD_ROOT@@g" | \
-	grep -v perllocal.pod | \
-	grep -v "\.packlist" > %{name}-%{version}-filelist
-if [ "$(cat %{name}-%{version}-filelist)X" = "X" ] ; then
-    echo "ERROR: EMPTY FILE LIST"
-    exit -1
-fi
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -f %{name}-%{version}-filelist
+
+%files
 %defattr(-,root,root,-)
+%doc BUGS README TODO
+%{_bindir}/gmuck
+%{_libdir}/perl*/*
+%{_mandir}/man?/*
+
 
 %changelog
-* Sun Jul  7 2002 Ville Skytt‰ <ville.skytta at iki.fi> 1.07-1
-- Release 1.07.
-
-* Wed Apr 17 2002 Ville Skytt‰ <ville.skytta at iki.fi>
-- First spec file.
+* Thu Sep  4 2003 Ville Skytt√§ <ville.skytta at iki.fi>
+- See ChangeLog.

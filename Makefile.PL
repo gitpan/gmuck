@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 1.4 2002/04/07 14:01:13 scop Exp $
+# $Id: Makefile.PL,v 1.8 2003/09/04 19:48:57 scop Exp $
 
 use ExtUtils::MakeMaker;
 
@@ -11,7 +11,7 @@ eval {
   require Regex::PreSuf;
 };
 if ($@) {
-  print " failed\n";
+  print " not found\n";
   print <<EOT;
   Regex::PreSuf is _not_ required.
   But if you had it installed, most gmuck tests would run slightly faster.
@@ -34,9 +34,10 @@ WriteMakefile(
               MAN1PODS          => { 'bin/gmuck.pod' =>
                                      '$(INST_MAN1DIR)/gmuck.$(MAN1EXT)',
                                    },
+              PL_FILES          => {}, # avoid installing Build.PL
               ($] >= 5.005 ?
                (ABSTRACT_FROM   => 'bin/gmuck.pod',
-                AUTHOR    => 'Ville Skytt‰ <ville . skytta @ iki . fi>') : ()),
+                AUTHOR    => 'Ville Skytt√§ <ville.skytta at iki.fi>') : ()),
 
               dist              => { COMPRESS => 'gzip -9f', SUFFIX => 'gz' },
              );

@@ -1,10 +1,10 @@
 package HTML::GMUCK;
 
-# $Id: GMUCK.pm,v 1.16 2002/07/07 09:56:49 scop Exp $
+# $Id: GMUCK.pm,v 1.19 2003/09/04 21:29:20 scop Exp $
 
 use strict;
 
-require 5.00503;
+require 5.006;
 
 use vars qw($VERSION $Tag_End $Tag_Start $Non_Tag_End
             $URI_Attrs $End_Omit $All_Elems
@@ -15,10 +15,12 @@ use vars qw($VERSION $Tag_End $Tag_Start $Non_Tag_End
 use Carp qw(carp);
 use HTML::Tagset 3.03 ();
 
+no warnings 'utf8';
+
 BEGIN
 {
 
-  $VERSION = sprintf("%d.%02d", q$Revision: 1.16 $ =~ /(\d+)\.(\d+)/);
+  $VERSION = sprintf("%d.%02d", q$Revision: 1.19 $ =~ /(\d+)\.(\d+)/);
 
   # We can use Regex::PreSuf for a small runtime speed gain.
   local *presuf;
@@ -198,7 +200,7 @@ BEGIN
   # Couple of special cases here, handled in _attributes().
 
   # Note that this $tmp is used also in @Length_Attrs below.
-  $tmp = '<((%s)\b\s??.*?\s(%s)=(["\'])(.+?)\4)';
+  $tmp = '<((%s)\b\s??[^>]*?\s(%s)=(["\'])([^>]+?)\4)';
 
   @Int_Attrs =
     map { qr/$_/i }
@@ -274,9 +276,9 @@ BEGIN
       sprintf($tmp, 'input', 'checked') => [ 'checked' ],
       sprintf($tmp, make_re(qw(input textarea)), 'readonly') =>
       [ qw(readonly) ],
-      sprintf($tmp, 'li', 'style') => [ qw(disc square circle 1 a A i I) ],
+      sprintf($tmp, 'li', 'type') => [ qw(disc square circle 1 a A i I) ],
       sprintf($tmp, 'object', 'declare') => [ 'declare' ],
-      sprintf($tmp, 'ol', 'style') => [ qw(1 a A i I) ],
+      sprintf($tmp, 'ol', 'type') => [ qw(1 a A i I) ],
       sprintf($tmp, 'param', 'valuetype') => [ qw(DATA REF OBJECT) ],
       sprintf($tmp, 'script', 'defer') => [ 'defer' ],
       sprintf($tmp, 'table', 'align') => [ qw(left center right) ],
@@ -286,7 +288,7 @@ BEGIN
       sprintf($tmp, make_re(qw(td th)), 'nowrap') => [ qw(nowrap) ],
       sprintf($tmp, make_re(qw(td th)), 'scope') =>
       [ qw(row col rowgroup colgroup) ],
-      sprintf($tmp, 'ul', 'style') => [ qw(disc square circle) ],
+      sprintf($tmp, 'ul', 'type') => [ qw(disc square circle) ],
       sprintf($tmp, 'input', 'type') =>
       [qw(text password checkbox radio submit reset file hidden image button)],
       # --- these are XHTML only ---
