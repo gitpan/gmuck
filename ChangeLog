@@ -1,3 +1,53 @@
+2002-04-30  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* Released 1.05.
+
+	* lib/HTML/GMUCK.pm (@Fixed_Attrs, &_attributes):
+	Add input->type, html->xmlns and pre,script,style->xml:space
+	to fixed attribute checks.
+
+2002-04-21  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* lib/HTML/GMUCK.pm (&_attributes):
+	Check number, length and fixed attribute values.
+	(@Int_Attrs, @Length_Attrs, @Fixed_Attrs): New.
+
+	* SPECS: New file.
+
+	* TODO: Brought up to date.
+
+2002-04-20  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* bin/gmuck, bin/gmuck.pod:
+	New option, --[no]minattributes.
+
+	* lib/HTML/GMUCK.pm, lib/HTML/GMUCK.pod:
+	New method, min_attributes().
+	New constructor option, min_attributes.
+
+	* bin/gmuck, lib/HTML/GMUCK.pm: Added function prototypes.
+
+2002-04-18  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* bin/gmuck, bin/gmuck.pod:
+	New option, --[no]binary.
+
+	* bin/gmuck:
+	Output warnings of dirs and binaries if in verbose mode.
+
+2002-04-17  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* lib/HTML/GMUCK.pm:
+	($Tag_Start): Allow also end tags, like "</foo".
+	(&_deprecated): Find deprecated element end tags too.
+
+	* t/010elem.t, etc/gmuck.spec: New files.
+
+2002-04-11  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* lib/HTML/GMUCK.pm:
+	Tuned error messages, readability enhancements.
+
 2002-04-09  Ville Skyttä  <ville . skytta @ iki . fi>
 
 	* Released 1.04.

@@ -1,4 +1,4 @@
-$Id: GMUCK.pod,v 1.1 2002/04/07 14:03:35 scop Exp $
+$Id: GMUCK.pod,v 1.2 2002/04/20 18:05:08 scop Exp $
 
 =head1 NAME
 
@@ -8,19 +8,32 @@ HTML::GMUCK - The Generated MarkUp ChecKer
 
  use HTML::GMUCK ();
 
- my $gmuck = HTML::GMUCK->new( mode      => 'XHTML',
-                               tab_width => 4,
-                               quote     => '"',
+ my $gmuck = HTML::GMUCK->new( mode           => 'XHTML',
+                               tab_width      => 4,
+                               quote          => '"',
+                               min_attributes => 1,
                              );
 
  my @elem_errors = $gmuck->elements  ($string);
- my @attr_arrors = $gmuck->attributes($string);
+ my @attr_errors = $gmuck->attributes($string);
  my @ent_errors  = $gmuck->entities  ($string);
  my @doct_errors = $gmuck->doctype   ($string);
  my @mime_errors = $gmuck->mime_types($string);
  my @depr_errors = $gmuck->deprecated($string);
 
+ my $mode      = $gmuck->mode();
+ my $mode      = $gmuck->mode('HTML');
+
+ my $tab_width = $gmuck->tab_width();
+ my $tab_width = $gmuck->tab_width(2);
+
+ my $min_attrs = $gmuck->min_attributes();
+ my $min_attrs = $gmuck->min_attributes(1);
+
  my ($num_errors, $num_warnings) = $gmuck->stats();
+ my ($num_errors, $num_warnings) = $gmuck->reset();
+
+ my $version = $gmuck->full_version();
 
 =head1 DESCRIPTION
 
@@ -51,6 +64,10 @@ See L<tab_width()>.
 I<quote> sets your preferred character for attribute quoting,
 the default is '"' (the double quote).
 See L<quote()>.
+
+I<min_attributes> enables or disables minimized attribute checks,
+the default is enabled.
+See L<min_attributes()> and L<attributes()>.
 
 =back
 
@@ -169,6 +186,15 @@ Gets, or if called with an optional argument, sets the preferred
 quote character of the object.  Valid values are '"' (the double quote),
 ''' (the single quote) and '' (the empty string).
 
+=item B<min_attributes>
+
+  $min_attrs = $gmuck->min_attributes( [$min_attrs] );
+
+Gets, or if called with an optional argument, sets whether minimized
+attributes will be checked when attributes() is called.  A true value
+enables the checks, a non-true disables them.  It is not allowed to
+turn off checks for minimized attributes in XML-based modes (XHTML, XML).
+
 =item B<stats>
 
   ($errors, $warnings) = $gmuck->stats();
@@ -183,7 +209,8 @@ Similar to stats(), but also resets the error and warning counts to 0.
 
 =item B<full_version>
 
-  ($version) $gmuck->full_version();
+  $version = $gmuck->full_version();
+  $version = HTML::GMUCK::full_version();
 
 Gets the version, with information about other packages in use.
 You can also call this as a function.

@@ -1,13 +1,15 @@
-# $Id: MANIFEST,v 1.3 2002/04/07 14:05:28 scop Exp $
+# $Id: MANIFEST,v 1.5 2002/04/21 16:36:11 scop Exp $
 
 BUGS
 ChangeLog
 Makefile.PL
 MANIFEST
 README
+SPECS
 TODO
 test.pl
 bin/gmuck
 bin/gmuck.pod
 lib/HTML/GMUCK.pm
 lib/HTML/GMUCK.pod
+etc/gmuck.spec

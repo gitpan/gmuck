@@ -19,8 +19,9 @@ Welcome to gmuck!
   like.
 
   See the gmuck(1) and HTML::GMUCK(3) manual pages
-  (or "perldoc docs/gmuck.pod" and "perldoc docs/HTML-GMUCK.pod" before
-  installation), and ChangeLog, TODO and BUGS files for more information.
+  (or before installation, "perldoc bin/gmuck.pod" and
+  "perldoc lib/HTML/GMUCK.pod" in the dir where you unpacked gmuck),
+  and ChangeLog, TODO and BUGS files for more information.
 
 
 DEPENDENCIES
@@ -75,4 +76,4 @@ COPYRIGHT
   License ("GPL") as published by the Free Software Foundation;
   either version 2 of the GPL, or (at your option) any later version.
 
-$Id: README,v 1.5 2002/04/07 13:03:28 scop Exp $
+$Id: README,v 1.6 2002/04/09 21:35:40 scop Exp $

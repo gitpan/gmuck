@@ -1,6 +1,6 @@
 package HTML::GMUCK;
 
-# $Id: GMUCK.pm,v 1.6 2002/04/09 19:53:08 scop Exp $
+# $Id: GMUCK.pm,v 1.14 2002/04/29 21:43:35 scop Exp $
 
 use strict;
 
@@ -9,7 +9,8 @@ require 5.00503;
 use vars qw($VERSION $Tag_End $Tag_Start $Non_Tag_End
             $URI_Attrs $End_Omit $All_Elems
             $Min_Elems $Compat_Elems $Min_Attrs $MIME_Type @MIME_Attrs
-            %Req_Attrs $All_Attrs $Depr_Elems @Depr_Attrs);
+            %Req_Attrs $All_Attrs $Depr_Elems @Depr_Attrs @Int_Attrs
+            @Length_Attrs @Fixed_Attrs);
 
 use Carp qw(carp);
 use HTML::Tagset 3.03 ();
@@ -17,7 +18,7 @@ use HTML::Tagset 3.03 ();
 BEGIN
 {
 
-  $VERSION = sprintf("%d.%02d", q$Revision: 1.6 $ =~ /(\d+)\.(\d+)/);
+  $VERSION = sprintf("%d.%02d", q$Revision: 1.14 $ =~ /(\d+)\.(\d+)/);
 
   # We can use Regex::PreSuf for a small runtime speed gain.
   local *presuf;
@@ -26,9 +27,9 @@ BEGIN
     require Regex::PreSuf;
     *presuf = \&Regex::PreSuf::presuf;
   };
-  *presuf = sub { return join('|', sort(@_)); } if $@;
+  *presuf = sub (@) { return join('|', sort(@_)); } if $@;
 
-  sub make_re {
+  sub make_re (@) {
     return '\b(?:' . presuf(@_) . ')\b';
   }
 
@@ -43,7 +44,8 @@ BEGIN
   $Non_Tag_End = qr/(?:[^>]|(?<=-)>)/o;
 
   # This is used in optimizations.  Elements are from <a> to <var>.
-  $Tag_Start = qr/<[a-vA-V]/o;
+  # We also allow end tags, hence the "/".
+  $Tag_Start = qr/<\/?[a-vA-V]/o;
 
   my $tmp = '';
   my %tmp = ();
@@ -164,9 +166,6 @@ BEGIN
 
   # Note that we're using the same $tmp as %Req_Attrs...
 
-  # TODO: this does not catch minimized deprecated elements.
-  # TODO: this is a mess, could be cleaned up.
-  # TODO: table height in XHTML (not deprecated, but a common caveat...)
   @Depr_Attrs =
     map { qr/$_/i }
     ( sprintf($tmp,
@@ -191,15 +190,121 @@ BEGIN
 
 
   # Deprecated elements as of HTML 4.01.
-  # Parens: 1: for pos(), 2: element
-  $tmp = make_re(qw(applet basefont center dir font isindex menu s strike u));
-  $Depr_Elems = qr/<(($tmp)(?:\s|$Tag_End|\Z))/io; # \Z) wont mess indent :)
+  $Depr_Elems =
+    make_re(qw(applet basefont center dir font isindex menu s strike u));
+
+
+  # Attributes whose value is an integer, from HTML 4.01 and XHTML 1.0.
+  # Couple of special cases here, handled in _attributes().
+
+  # Note that this $tmp is used also in @Length_Attrs below.
+  $tmp = '<((%s)\b\s??.*?\s(%s)=(["\'])(.+?)\4)';
+
+  @Int_Attrs =
+    map { qr/$_/i }
+    (
+     # NUMBER/Number
+     sprintf($tmp, 'textarea',                 make_re(qw(cols rows))),
+     sprintf($tmp, make_re(qw(td th)),         make_re(qw(colspan rowspan))),
+     sprintf($tmp, 'input',                   'maxlength'),
+     sprintf($tmp, 'select',                  'size'),
+     sprintf($tmp, make_re(qw(col colgroup)), 'span'),
+     sprintf($tmp, 'ol',                      'start'),
+     sprintf($tmp,
+             make_re(qw(a area button input object select textarea)),
+             'tabindex'),
+     sprintf($tmp, 'li',                      'value'),
+     sprintf($tmp, 'pre',                     'width'),
+     # Pixels
+     sprintf($tmp, make_re(qw(applet img)),    make_re(qw(hspace vspace))),
+     sprintf($tmp,
+             make_re(qw(frame iframe)), make_re(qw(marginheight marginwidth))),
+     sprintf($tmp, 'hr',                      'size'),
+     sprintf($tmp, make_re(qw(img table)),    'border'),          # img: HTML 4
+     sprintf($tmp, 'object',                make_re(qw(border hspace vspace))),
+     sprintf($tmp, make_re(qw(td th)),  make_re(qw(width height))), # XHTML 1.0
+    );
+
+  # Attributes whose value is %Length, from HTML 4.01 and XHTML 1.0.
+  # Couple of special cases here, handled in _attributes().
+
+  # Note that we're using the same $tmp as in @Int_Attrs above.
+
+  @Length_Attrs =
+    map { qr/$_/i }
+    ( sprintf($tmp, 'table', make_re(qw(cellpadding cellspacing))),
+      sprintf($tmp,
+              make_re(qw(col colgroup tbody td tfoot th thead tr)), 'charoff'),
+      sprintf($tmp, make_re(qw(applet iframe img object)), 'height'),
+      sprintf($tmp, make_re(qw(applet hr iframe img object table)), 'width'),
+      sprintf($tmp, make_re(qw(td th)), make_re(qw(width height))),    # HTML 4
+      sprintf($tmp, 'img', 'border'),                               # XHTML 1.0
+    );
+
+  # Attributes that have a fixed set of values, from HTML 4.01.
+  # Note that we're using the same $tmp as in @Int_Attrs above.
+
+  %tmp =
+    ( sprintf($tmp, make_re(qw(a area)), 'shape') =>
+      [ qw(rect circle poly default) ],
+      sprintf($tmp, make_re(qw(applet iframe img input object)), 'align') =>
+      [ qw(top middle bottom left right) ],
+      sprintf($tmp, 'area', 'nohref') => [ 'nohref' ],
+      sprintf($tmp, 'br', 'clear') => [ qw(left all right none) ],
+      sprintf($tmp, 'button', 'type') => [ qw(button submit reset) ],
+      sprintf($tmp, make_re(qw(button input option optgroup select textarea)),
+              'disabled') => [ 'disabled' ],
+      sprintf($tmp, make_re(qw(caption legend)), 'align') =>
+      [ qw(top bottom left right) ],
+      sprintf($tmp, make_re(qw(col colgroup tbody td tfoot th thead tr)),
+              'align') => [ qw(left center right justify char) ],
+      sprintf($tmp, make_re(qw(col colgroup tbody td tfoot th thead tr)),
+              'valign') => [ qw(top middle bottom baseline) ],
+      sprintf($tmp, make_re(qw(dir dl menu ol ul)), 'compact') => [ 'compact'],
+      sprintf($tmp, make_re(qw(div h1 h2 h3 h4 h5 h6 p)), 'align') =>
+      [ qw(left center right justify) ],
+      sprintf($tmp, 'form', 'method') => [ qw(get post) ],
+      sprintf($tmp, 'frame', 'noresize') => [ 'noresize' ],
+      sprintf($tmp, make_re(qw(frame iframe)), 'frameborder') => [ qw(0 1) ],
+      sprintf($tmp, make_re(qw(frame iframe)), 'scrolling') =>
+      [ qw(yes no auto) ],
+      sprintf($tmp, 'hr', 'align') => [ qw(left center justify) ],
+      sprintf($tmp, 'hr', 'noshade') => [ 'noshade' ],
+      sprintf($tmp, make_re(qw(img input)), 'ismap') => [ 'ismap' ],
+      sprintf($tmp, 'input', 'checked') => [ 'checked' ],
+      sprintf($tmp, make_re(qw(input textarea)), 'readonly') =>
+      [ qw(readonly) ],
+      sprintf($tmp, 'li', 'style') => [ qw(disc square circle 1 a A i I) ],
+      sprintf($tmp, 'object', 'declare') => [ 'declare' ],
+      sprintf($tmp, 'ol', 'style') => [ qw(1 a A i I) ],
+      sprintf($tmp, 'param', 'valuetype') => [ qw(DATA REF OBJECT) ],
+      sprintf($tmp, 'script', 'defer') => [ 'defer' ],
+      sprintf($tmp, 'table', 'align') => [ qw(left center right) ],
+      sprintf($tmp, 'table', 'frame') =>
+      [ qw(void above below hsides lhs rhs vsides box border) ],
+      sprintf($tmp, 'table', 'rules') => [ qw(none groups rows cols all) ],
+      sprintf($tmp, make_re(qw(td th)), 'nowrap') => [ qw(nowrap) ],
+      sprintf($tmp, make_re(qw(td th)), 'scope') =>
+      [ qw(row col rowgroup colgroup) ],
+      sprintf($tmp, 'ul', 'style') => [ qw(disc square circle) ],
+      sprintf($tmp, 'input', 'type') =>
+      [qw(text password checkbox radio submit reset file hidden image button)],
+      # --- these are XHTML only ---
+      sprintf($tmp, 'html', 'xmlns') => [ 'http://www.w3.org/1999/xhtml' ],
+      sprintf($tmp, make_re(qw(pre script style)),'xml:space') => ['preserve'],
+    );
+
+  @Fixed_Attrs = ();
+  while (my ($re, $vals) = each(%tmp)) {
+    my $v = make_re(@$vals);
+    push(@Fixed_Attrs, [ qr/$re/i, qr/$v/i, join('|', @$vals) ]);
+  }
 
 }
 
 # ----- Constructors -------------------------------------------------------- #
 
-sub new
+sub new ($;%)
 {
   my ($class, %attr) = @_;
 
@@ -212,6 +317,7 @@ sub new
                     _num_errors   => undef,
                     _num_warnings => undef,
                     _quote        => undef,
+                    _min_attrs    => undef,
                    },
                    (ref($class) || $class));
 
@@ -226,6 +332,8 @@ sub new
   my $quote = delete($attr{quote});
   $this->quote(defined($quote) ? $quote : '"');
 
+  $this->min_attributes(delete($attr{min_attributes}));
+
   $this->reset();
 
   if (my @unknown = keys(%attr)) {
@@ -237,9 +345,9 @@ sub new
 
 # ---------- Check: deprecated ---------------------------------------------- #
 
-sub deprecated { return shift->_wrap('_deprecated', @_);}
+sub deprecated ($@) { return shift->_wrap('_deprecated', @_);}
 
-sub _deprecated
+sub _deprecated ($$)
 {
   my ($this, $line) = @_;
   my @errors = ();
@@ -263,10 +371,17 @@ sub _deprecated
 
   # ---
 
-  while ($line =~ /$Depr_Elems/g) {
-    push(@errors, { col  => $this->_pos($line, pos($line) - length($1)),
-                    elem => $2,
-                    mesg => 'deprecated element',
+  while ($line =~ /
+         <
+         (\/?)
+         (
+          ($Depr_Elems)
+          (?:$|$Tag_End|\s)
+         )
+         /giox) {
+    push(@errors, { col  => $this->_pos($line, pos($line) - length($2)),
+                    elem => $3,
+                    mesg => 'deprecated element' . ($1 ? ' end' : ''),
                     type => 'W',
                   },
         );
@@ -283,7 +398,7 @@ sub _deprecated
                         elem => $elem,
                         attr => $attr,
                         type => 'W',
-                        mesg => 'deprecated attribute (for this element)',
+                        mesg => 'deprecated attribute for this element',
                       },
             );
       }
@@ -295,18 +410,17 @@ sub _deprecated
 
 # ----- Check: attributes --------------------------------------------------- #
 
-sub attributes { return shift->_wrap('_attributes', @_); }
+sub attributes ($@) { return shift->_wrap('_attributes', @_); }
 
-#
-# Note that minimized attributes are forbidden only in XHTML, but it
-# is legal to have them in HTML too.
-#
-sub _attributes
+sub _attributes ($$)
 {
   my ($this, $line) = @_;
   return () unless $this->{_html};
 
   my @errors = ();
+
+  # ---
+
   my $type = $this->{_xhtml} ? 'E' : 'W';
 
   # BUG: Does not catch non-lowercase minimized attributes, like CHECKED.
@@ -352,31 +466,137 @@ sub _attributes
     }
   }
 
+  # ---
 
   # Optimization.
   return @errors unless $line =~ /$Tag_Start\w../o;
 
+  # ---
 
-  # Not doing this check inside <>'s would result in too much bogus.
-  while ($line =~ /
-         <
-         $Non_Tag_End+?
-         \s
-         (
-          ($Min_Attrs)
-          ([=\s]|$Tag_End)
-         )
-         /giox) {
-    my ($m, $attr, $eq) = ($1, $2, $3);
-    if ($eq ne '=') {
-      push(@errors, { col  => $this->_pos($line, pos($line) - length($m)),
-                      attr => $attr,
-                      type => $type,
-                      mesg => 'minimized attribute',
-                    },
-          );
+  foreach my $re (@Int_Attrs) {
+
+    my $msg = 'value should be an integer: "%s"';
+
+    while ($line =~ /$re/g) {
+      my ($m, $el, $att, $q, $val) = ($1, $2, $3, $4, $5);
+      my $lel = lc($el);
+      my $latt = lc($att);
+
+      if ($val !~ /^\d+$/o &&
+          $val !~ /[\\\$\(\[]/o   # bogus protection
+         ) {
+
+        # Special case: td,th->width,height only in XHTML
+        next if (! $this->{_xhtml} &&
+                 ($lel  eq 'td'    || $lel  eq 'th') &&
+                 ($latt eq 'width' || $latt eq 'height'));
+
+        # Special case: img->border only in HTML 4
+        next if ($this->{_xhtml} && $lel eq 'img' && $latt eq 'border');
+
+        push(@errors, { col  => $this->_pos($line, pos($line) - length($m)),
+                        type => 'E',
+                        mesg => sprintf($msg, $val),
+                        elem => $el,
+                        attr => $att,
+                      },
+            );
+      }
     }
   }
+
+  # ---
+
+  foreach my $re (@Length_Attrs) {
+
+    my $msg = 'value should be an integer or a percentage: "%s"';
+
+    while ($line =~ /$re/g) {
+
+      my ($m, $el, $att, $q, $val) = ($1, $2, $3, $4, $5);
+
+      if ($val !~ /^\d+%?$/o &&
+          $val !~ /[\\\$\(\[]/o   # bogus protection
+         ) {
+
+        push(@errors, { col  => $this->_pos($line, pos($line) - length($m)),
+                        type => 'E',
+                        mesg => sprintf($msg, $val),
+                        elem => $el,
+                        attr => $att,
+                      },
+            );
+      }
+    }
+  }
+
+  # ---
+
+  foreach (@Fixed_Attrs) {
+
+    my ($re, $vre, $vals) = @$_;
+    my $msg = 'invalid value: "%s", should be %s"%s"';
+
+    while ($line =~ /$re/g) {
+
+      my ($m, $el, $att, $q, $val) = ($1, $2, $3, $4, $5);
+
+      if ($val !~ $vre &&
+          $val !~ /[\\\$\(\[]/o    # bogus protection
+         ) {
+
+        my $latt = lc($att);
+        my $lel  = lc($el);
+
+        # Special case: html->xmlns and pre,script,style->xml:space XHTML-only
+        next if (! $this->{_xhtml} &&
+                 (($lel eq 'html' && $latt eq 'xmlns') ||
+                  ($latt eq 'xml:space' && $lel =~ /^(pre|s(cript|tyle))$/o)));
+
+        push(@errors, { col  => $this->_pos($line, pos($line) - length($m)),
+                        type => 'E',
+                        mesg => sprintf($msg, $val,
+                                        ($vals =~ /\|/o) ? 'one of ' : '',
+                                        $vals),
+                        elem => $el,
+                        attr => $att,
+                      },
+            );
+      }
+    }
+  }
+
+  # ---
+
+  #
+  # Note that minimized attributes are forbidden only in XHTML, but it
+  # is legal to have them in HTML too.
+  #
+  # Not doing this check inside <>'s would result in too much bogus.
+  #
+  if ($this->{_min_attrs}) {
+    while ($line =~ /
+           <
+           $Non_Tag_End+?
+           \s
+           (
+            ($Min_Attrs)
+            ([=\s]|$Tag_End)
+           )
+           /giox) {
+      my ($m, $attr, $eq) = ($1, $2, $3);
+      if ($eq ne '=') {
+        push(@errors, { col  => $this->_pos($line, pos($line) - length($m)),
+                        attr => $attr,
+                        type => $type,
+                        mesg => 'minimized attribute',
+                      },
+            );
+      }
+    }
+  }
+
+  # ---
 
   while (my ($attr, $re) = each(%Req_Attrs)) {
 
@@ -420,9 +640,9 @@ sub _attributes
 
 # ----- Check: MIME types --------------------------------------------------- #
 
-sub mime_types { return shift->_wrap('_mime_types', @_); }
+sub mime_types ($@) { return shift->_wrap('_mime_types', @_); }
 
-sub _mime_types
+sub _mime_types ($$)
 {
   my ($this, $line) = @_;
   return () unless $this->{_html};
@@ -469,9 +689,9 @@ sub _mime_types
 
 # ----- Check: elements ----------------------------------------------------- #
 
-sub elements { return shift->_wrap('_elements', @_); }
+sub elements ($@) { return shift->_wrap('_elements', @_); }
 
-sub _elements
+sub _elements ($$)
 {
   my ($this, $line) = @_;
   return () unless $this->{_html};
@@ -613,9 +833,9 @@ sub _elements
 # ----- Check: entities ----------------------------------------------------- #
 
 # Check for unterminated entities in URIs (usually & instead of &amp;).
-sub entities { return shift->_wrap('_entities', @_);}
+sub entities ($@) { return shift->_wrap('_entities', @_);}
 
-sub _entities
+sub _entities ($$)
 {
   my ($this, $line) = @_;
   return () unless $this->{_html};
@@ -641,7 +861,9 @@ sub _entities
           )
          )
          /giox) {
+
     my ($attr, $pos, $val) = ($1, pos($line) - length($2), $3);
+
     while ($val =~ /(&([^;]*?))[=\"\'\#\s]/go) {
       push(@errors, { col =>
                       $this->_pos($line, $pos + pos($val) - length($2) - 1),
@@ -659,9 +881,9 @@ sub _entities
 # ----- Check: DOCTYPE ------------------------------------------------------ #
 
 # Check for doctype declaration errors.
-sub doctype { return shift->_wrap('_doctype', @_); }
+sub doctype ($@) { return shift->_wrap('_doctype', @_); }
 
-sub _doctype
+sub _doctype ($$)
 {
   my ($this, $line) = @_;
   my @errors = ();
@@ -724,7 +946,7 @@ sub _doctype
 
 # ---------- Accessors and mutators ----------------------------------------- #
 
-sub mode
+sub mode ($;$)
 {
   my ($this, $mode) = @_;
   if ($mode) {
@@ -754,26 +976,40 @@ sub mode
   return $this->{_mode};
 }
 
-sub tab_width
+sub tab_width ($;$)
 {
   my ($this, $tw) = @_;
   if (defined($tw)) {
     if ($tw > 0) {
       $this->{_tab_width} = sprintf("%.0f", $tw); # Uh. Integers please.
     } else {
-      carp("** TAB width must be > 0.");
+      carp("** TAB width must be > 0");
     }
   }
   return $this->{_tab_width};
 }
 
-sub stats
+sub min_attributes ($;$)
+{
+  my ($this, $minattr) = @_;
+  if (defined($minattr)) {
+    if (! $minattr && $this->{_xml}) {
+      carp("** Will not disable minimized attribute checks in " .
+           $this->mode() . " mode");
+    } else {
+      $this->{_min_attrs} = $minattr;
+    }
+  }
+  return $this->{_min_attrs};
+}
+
+sub stats ($)
 {
   my $this = shift;
   return ($this->{_num_errors}, $this->{_num_warnings});
 }
 
-sub reset
+sub reset ($)
 {
   my $this = shift;
   my ($e, $w) = $this->stats();
@@ -782,7 +1018,7 @@ sub reset
   return ($e, $w);
 }
 
-sub quote
+sub quote ($;$)
 {
   my ($this, $q) = @_;
   if (defined($q)) {
@@ -799,7 +1035,7 @@ sub quote
   return $this->{_quote};
 }
 
-sub full_version
+sub full_version (;$)
 {
   return "HTML::GMUCK $VERSION (HTML::Tagset " .
     ($HTML::Tagset::VERSION || 'N/A') . ", Regex::PreSuf " .
@@ -808,7 +1044,7 @@ sub full_version
 
 # ---------- Utility methods ------------------------------------------------ #
 
-sub _pos
+sub _pos ($$$)
 {
   my ($this, $line, $pos) = @_;
   $pos = 0 unless (defined($pos) && $pos > 0);
@@ -821,7 +1057,7 @@ sub _pos
   return $pos;
 }
 
-sub _wrap
+sub _wrap ($$@)
 {
   my ($this, $method, @lines) = @_;
   my @errors = ();

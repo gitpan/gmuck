@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: gmuck,v 1.5 2002/04/08 22:29:41 scop Exp $
+# $Id: gmuck,v 1.10 2002/04/21 20:41:24 scop Exp $
 
 use strict;
 
@@ -11,41 +11,51 @@ use vars qw($VERSION $File $Line);
 use Getopt::Long ();
 use HTML::GMUCK ();
 
-$VERSION = '1.04';
+$VERSION = '1.05';
 
 $| = 1;
 
+# ----- Prototypes ------------------------------------------------------------
+
+sub output (@);
+sub qprint (@);
+sub process_lines ($;$);
+
 # ----- Arguments -------------------------------------------------------------
 
-my $Opt_Help        = 0;   # Output help
-my $Opt_Quick       = 0;   # Quick mode
-my $Opt_Verbose     = 1;   # Verbose mode
-my $Opt_Tab_Width   = 4;   # TAB width
-my $Opt_Stdin  = 'STDIN';  # Defult file name for STDIN input.
-my $Opt_Mode   = 'XHTML';  # Default mode.
-my $Opt_Quote      = 'D';  # Quote style.
+my $Opt_Help          = 0;   # Output help
+my $Opt_Quick         = 0;   # Quick mode
+my $Opt_Verbose       = 1;   # Verbose mode
+my $Opt_Tab_Width     = 4;   # TAB width
+my $Opt_Stdin    = 'STDIN';  # Defult file name for STDIN input.
+my $Opt_Mode     = 'XHTML';  # Default mode.
+my $Opt_Quote         ='D';  # Quote style.
+my $Opt_Binary        = 0;   # Check binary files too.
 
-my $Opt_Elements    = 1;   # Element checks.
-my $Opt_Attributes  = 1;   # Attribute checks.
-my $Opt_Entities    = 1;   # Entity checks.
-my $Opt_Doctype     = 1;   # DOCTYPE checks.
-my $Opt_Mimetypes   = 1;   # MIME type checks.
-my $Opt_Deprecated  = 1;   # Deprecation checks.
+my $Opt_Elements      = 1;   # Element checks.
+my $Opt_Attributes    = 1;   # Attribute checks.
+my $Opt_MinAttributes = 1;   # Minimized attribute checks.
+my $Opt_Entities      = 1;   # Entity checks.
+my $Opt_Doctype       = 1;   # DOCTYPE checks.
+my $Opt_Mimetypes     = 1;   # MIME type checks.
+my $Opt_Deprecated    = 1;   # Deprecation checks.
 
-Getopt::Long::GetOptions('help!'       => \$Opt_Help,
-                         'quick!'      => \$Opt_Quick,
-                         'tabwidth=i'  => \$Opt_Tab_Width,
-                         'stdin=s'     => \$Opt_Stdin,
-                         'mode=s'      => \$Opt_Mode,
-                         'quote=s'     => \$Opt_Quote,
-                         'verbose!'    => \$Opt_Verbose,
+Getopt::Long::GetOptions('help!'           => \$Opt_Help,
+                         'quick!'          => \$Opt_Quick,
+                         'tabwidth=i'      => \$Opt_Tab_Width,
+                         'stdin=s'         => \$Opt_Stdin,
+                         'mode=s'          => \$Opt_Mode,
+                         'quote=s'         => \$Opt_Quote,
+                         'verbose!'        => \$Opt_Verbose,
+                         'binary!'         => \$Opt_Binary,
 
-                         'elements!'   => \$Opt_Elements,
-                         'attributes!' => \$Opt_Attributes,
-                         'entities!'   => \$Opt_Entities,
-                         'doctype!'    => \$Opt_Doctype,
-                         'mimetypes!'  => \$Opt_Mimetypes,
-                         'deprecated!' => \$Opt_Deprecated,
+                         'elements!'       => \$Opt_Elements,
+                         'attributes!'     => \$Opt_Attributes,
+                         'minattributes!'  => \$Opt_MinAttributes,
+                         'entities!'       => \$Opt_Entities,
+                         'doctype!'        => \$Opt_Doctype,
+                         'mimetypes!'      => \$Opt_Mimetypes,
+                         'deprecated!'     => \$Opt_Deprecated,
                         );
 
 qprint("gmuck version $VERSION");
@@ -59,15 +69,17 @@ Usage: gmuck [OPTION...] [--] [FILE...]
 General OPTIONs are:
   --[no]help            Output this help and exit.
   --mode=<mode>         Mode of operation.  XHTML (default), HTML, XML.
-  --[no]quick           Quick mode (max 1 failed check per line).
-  --[no]verbose         Verbose mode.
   --tabwidth=<n>        TAB width for error output.
   --stdin=<filename>    File name for STDIN messages.
   --quote=<char>        Preferred quote char; D=double, S=single, N=none.
+  --[no]quick           Quick mode (max 1 failed check per line).
+  --[no]verbose         Verbose mode.
+  --[no]binary          Check binary files.
 
 Per-check OPTIONs are (all on by default):
   --[no]elements        Element checks.
   --[no]attributes      Attribute checks.
+  --[no]minattributes   Minimized attribute checks.
   --[no]entities        Entity checks.
   --[no]doctype         DOCTYPE checks.
   --[no]mimetypes       MIME type checks.
@@ -104,25 +116,29 @@ my $Skip_Count          = 0;
 
 # ----- Main processing -------------------------------------------------------
 
-my $gmuck = HTML::GMUCK->new(tab_width => $Opt_Tab_Width,
-                             mode      => uc($Opt_Mode),
-                             quote     => $Opt_Quote,
+my $gmuck = HTML::GMUCK->new(tab_width      => $Opt_Tab_Width,
+                             mode           => uc($Opt_Mode),
+                             quote          => $Opt_Quote,
+                             min_attributes => $Opt_MinAttributes,
                             );
 
-qprint('Settings: (mode=', $gmuck->mode(), ', tab=', $gmuck->tab_width(),
-       ', quote={', $gmuck->quote(), '}',  ($Opt_Quick ? ', quick' : ''), ')');
+qprint('Settings: mode=', $gmuck->mode(), ', tab=', $gmuck->tab_width(),
+       ', quote={', $gmuck->quote(), '}',  ($Opt_Quick ? ', quick' : ''));
 
 if (@ARGV) {
   foreach $File (@ARGV) {
     if (-d $File) {
-      #warn("** $File looks like a dir to me, skipping.\n");
+      warn("** '$File' looks like a dir, skipping.\n") if $Opt_Verbose;
+      $Skip_Count++;
+    } elsif (!$Opt_Binary && -B _) {
+      warn("** '$File' seems binary, skipping.\n")     if $Opt_Verbose;
       $Skip_Count++;
     } elsif (open(FILE, $File)) {
       $File_Count++;
       process_lines($gmuck, \*FILE);
-      close(FILE) or warn("** Error closing file $File: $!\n");
+      close(FILE) or warn("** Error closing '$File': $!\n");
     } else {
-      warn("** Can't open file $File for reading: $!\n");
+      warn("** Can't open '$File' for reading: $!\n");
       $Skip_Count++;
     }
   }
@@ -141,9 +157,9 @@ qprint("Done. $File_Count files, $Skip_Count skipped, ",
 
 exit(($errors + $warnings > 0) ? 1 : 0);
 
-# ----- The workhorse ------------------------------------------------------- #
+# ----- The workhorse ---------------------------------------------------------
 
-sub process_lines
+sub process_lines ($;$)
 {
   my $gmuck = shift;
   my $fh = shift or $Skip_Count++ and return;
@@ -164,7 +180,7 @@ sub process_lines
 
 # ----- Utilities -------------------------------------------------------------
 
-sub output
+sub output (@)
 {
   my $ret = 0;
   foreach my $err (@_) {
@@ -187,7 +203,7 @@ sub output
   return ($ret && $Opt_Quick);
 }
 
-sub qprint
+sub qprint (@)
 {
   print '[ ', @_, " ]\n" if $Opt_Verbose;
 }
