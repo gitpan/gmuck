@@ -1,8 +1,8 @@
-# $Id: gmuck.spec,v 1.4 2002/04/29 21:50:49 scop Exp $
+# $Id: gmuck.spec,v 1.5 2002/05/12 16:51:06 scop Exp $
 
 Summary:        gmuck, the Generated MarkUp ChecKer
 Name:           gmuck
-Version:        1.05
+Version:        1.06
 Release:        1
 License:        Artistic / GPL
 Group:          Development/Tools

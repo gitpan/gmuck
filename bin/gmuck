@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: gmuck,v 1.10 2002/04/21 20:41:24 scop Exp $
+# $Id: gmuck,v 1.11 2002/05/12 16:51:06 scop Exp $
 
 use strict;
 
@@ -11,7 +11,7 @@ use vars qw($VERSION $File $Line);
 use Getopt::Long ();
 use HTML::GMUCK ();
 
-$VERSION = '1.05';
+$VERSION = '1.06';
 
 $| = 1;
 

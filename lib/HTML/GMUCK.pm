@@ -1,6 +1,6 @@
 package HTML::GMUCK;
 
-# $Id: GMUCK.pm,v 1.14 2002/04/29 21:43:35 scop Exp $
+# $Id: GMUCK.pm,v 1.15 2002/05/12 16:55:47 scop Exp $
 
 use strict;
 
@@ -18,7 +18,7 @@ use HTML::Tagset 3.03 ();
 BEGIN
 {
 
-  $VERSION = sprintf("%d.%02d", q$Revision: 1.14 $ =~ /(\d+)\.(\d+)/);
+  $VERSION = sprintf("%d.%02d", q$Revision: 1.15 $ =~ /(\d+)\.(\d+)/);
 
   # We can use Regex::PreSuf for a small runtime speed gain.
   local *presuf;
@@ -607,24 +607,18 @@ sub _attributes ($$)
 
       my ($m, $el, $att) = ($1, $2, $3);
 
-      if (! $att
-          &&
-          (
-           # Special cases:
+      if (! $att) {
 
-           # input/@name not required if input/@type = "submit" or "reset".
-           # Note that the default type for input is text...
-           ($el eq 'input' &&
-            # TODO: this is crap
-            $line !~ /\stype=(\\?[\"\'])?(submi|rese)t\b/io
-           )
+        my $lel  = lc($el);
 
-           ||
+        # Special case: @name not required for input/@type's submit and reset
+        next if ($lel eq 'input' && $attr eq 'name' &&
+                 # TODO: this is crap
+                 $line =~ /\stype=(\\?[\"\'])?(submi|rese)t\b/io);
 
-           # map/@id required only in XHTML 1.0+.
-           ($this->{_xhtml} && $el eq 'map' && $attr eq 'id')
+        # Special case: map/@id required only in XHTML 1.0+
+        next if ($lel eq 'map' && $attr eq 'id' && ! $this->{_xhtml});
 
-          )) {
         push(@errors, { col  => $this->_pos($line, pos($line) - length($m)),
                         type => 'E',
                         mesg => sprintf($msg, $attr),

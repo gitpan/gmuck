@@ -1,3 +1,12 @@
+2002-05-17  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* Released 1.06.
+
+2002-05-12  Ville Skyttä  <ville . skytta @ iki . fi>
+
+	* lib/HTML/GMUCK.pm (&_attributes):
+	Fixed required attribute check, simplified special case code.
+
 2002-04-30  Ville Skyttä  <ville . skytta @ iki . fi>
 
 	* Released 1.05.
