@@ -1,25 +1,19 @@
 #!/usr/bin/perl -w
 
-# $Id: gmuck,v 1.15 2004/08/08 00:05:30 scop Exp $
+# $Id: gmuck,v 1.17 2007/03/11 16:34:06 scop Exp $
 
 use strict;
 
 require 5.00503;
 
-use vars qw($VERSION $File $Line);
+use vars qw($VERSION);
 
 use Getopt::Long ();
 use HTML::GMUCK ();
 
-$VERSION = '1.10';
+$VERSION = '1.11';
 
 $| = 1;
-
-# ----- Prototypes ------------------------------------------------------------
-
-sub output (@);
-sub qprint (@);
-sub process_lines ($;$);
 
 # ----- Arguments -------------------------------------------------------------
 
@@ -111,8 +105,6 @@ $Opt_Tab_Width = 4 unless ($Opt_Tab_Width > 0);
 my $Line_Count          = 0;
 my $File_Count          = 0;
 my $Skip_Count          = 0;
-   $File                = "";
-   $Line                = 0;
 
 # ----- Main processing -------------------------------------------------------
 
@@ -126,28 +118,27 @@ qprint('Settings: mode=', $gmuck->mode(), ', tab=', $gmuck->tab_width(),
        ', quote={', $gmuck->quote(), '}',  ($Opt_Quick ? ', quick' : ''));
 
 if (@ARGV) {
-  foreach $File (@ARGV) {
-    if (-d $File) {
-      warn("** '$File' looks like a dir, skipping.\n") if $Opt_Verbose;
+  foreach my $filename (@ARGV) {
+    if (-d $filename) {
+      warn("** '$filename' looks like a dir, skipping.\n") if $Opt_Verbose;
       $Skip_Count++;
     } elsif (!$Opt_Binary && -B _) {
-      warn("** '$File' seems binary, skipping.\n")     if $Opt_Verbose;
+      warn("** '$filename' seems binary, skipping.\n")     if $Opt_Verbose;
       $Skip_Count++;
-    } elsif (open(FILE, $File)) {
+    } elsif (open(FILE, '<', $filename)) {
       $File_Count++;
-      process_lines($gmuck, \*FILE);
-      close(FILE) or warn("** Error closing '$File': $!\n");
+      process_lines($gmuck, \*FILE, $filename);
+      close(FILE) or warn("** Error closing '$filename': $!\n");
     } else {
-      warn("** Can't open '$File' for reading: $!\n");
+      warn("** Can't open '$filename' for reading: $!\n");
       $Skip_Count++;
     }
   }
 } else {
   qprint('Reading from STDIN, ',
          'use --help for options if you didn\'t want this.');
-  $File = $Opt_Stdin;
   $File_Count++;
-  process_lines($gmuck, \*STDIN);
+  process_lines($gmuck, \*STDIN, $Opt_Stdin);
 }
 
 my ($errors, $warnings) = $gmuck->stats();
@@ -159,32 +150,43 @@ exit(($errors + $warnings > 0) ? 1 : 0);
 
 # ----- The workhorse ---------------------------------------------------------
 
-sub process_lines ($;$)
+sub process_lines
 {
   my $gmuck = shift;
   my $fh = shift or $Skip_Count++ and return;
-  $Line = 0;
+  my $filename = shift;
+  my $line = 0;
 
  LINE:
   while (<$fh>) {
-    $Line++;
+    $line++;
     $Line_Count++;
-    output($gmuck->doctype($_))    and next LINE if $Opt_Doctype;
-    output($gmuck->attributes($_)) and next LINE if $Opt_Attributes;
-    output($gmuck->elements($_))   and next LINE if $Opt_Elements;
-    output($gmuck->mime_types($_)) and next LINE if $Opt_Mimetypes;
-    output($gmuck->entities($_))   and next LINE if $Opt_Entities;
-    output($gmuck->deprecated($_)) and next LINE if $Opt_Deprecated;
+    output($filename, $line, $gmuck->doctype($_))
+        and next LINE if $Opt_Doctype;
+    output($filename, $line, $gmuck->attributes($_))
+        and next LINE if $Opt_Attributes;
+    output($filename, $line, $gmuck->elements($_))
+        and next LINE if $Opt_Elements;
+    output($filename, $line, $gmuck->mime_types($_))
+        and next LINE if $Opt_Mimetypes;
+    output($filename, $line, $gmuck->entities($_))
+        and next LINE if $Opt_Entities;
+    output($filename, $line, $gmuck->deprecated($_))
+        and next LINE if $Opt_Deprecated;
   }
+
+  return;
 }
 
 # ----- Utilities -------------------------------------------------------------
 
-sub output (@)
+sub output
 {
   my $ret = 0;
+  my $filename = shift;
+  my $line = shift;
   foreach my $err (@_) {
-    print STDERR join(':', $File, ($Line + $err->{line}), $err->{col}),
+    print STDERR join(':', $filename, ($line + $err->{line}), $err->{col}),
         ": [$err->{type}] ";
     if ($err->{elem} || $err->{attr}) {
       print STDERR '<';
@@ -203,9 +205,10 @@ sub output (@)
   return ($ret && $Opt_Quick);
 }
 
-sub qprint (@)
+sub qprint
 {
   print '[ ', @_, " ]\n" if $Opt_Verbose;
+  return;
 }
 
 # ----- EOF -------------------------------------------------------------------

@@ -63,11 +63,11 @@ FEEDBACK
 
 COPYRIGHT
 
-  Copyright (C) 2001-2004  Ville Skyttä.  All rights reserved.
+  Copyright (C) 2001-2007  Ville Skyttä.  All rights reserved.
 
   gmuck is free software, you can redistribute it and/or modify it
   under the terms of The Artistic License or the GNU General Public
   License ("GPL") as published by the Free Software Foundation;
   either version 2 of the GPL, or (at your option) any later version.
 
-$Id: README,v 1.13 2004/08/07 23:40:22 scop Exp $
+$Id: README,v 1.14 2007/03/11 15:58:40 scop Exp $

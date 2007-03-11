@@ -1,6 +1,6 @@
 package HTML::GMUCK;
 
-# $Id: GMUCK.pm,v 1.20 2004/08/07 23:40:44 scop Exp $
+# $Id: GMUCK.pm,v 1.22 2007/03/11 16:16:42 scop Exp $
 
 use strict;
 
@@ -19,7 +19,7 @@ no warnings 'utf8';
 BEGIN
 {
 
-  $VERSION = sprintf("%d.%02d", q$Revision: 1.20 $ =~ /(\d+)\.(\d+)/);
+  $VERSION = sprintf("%d.%02d", q$Revision: 1.22 $ =~ /(\d+)\.(\d+)/);
 
   # --- Preload regexps.
 
@@ -35,7 +35,7 @@ BEGIN
 
 # ----- Constructors -------------------------------------------------------- #
 
-sub new ($;%)
+sub new
 {
   my ($class, %attr) = @_;
 
@@ -76,9 +76,9 @@ sub new ($;%)
 
 # ---------- Check: deprecated ---------------------------------------------- #
 
-sub deprecated ($@) { return shift->_wrap('_deprecated', @_);}
+sub deprecated { return shift->_wrap('_deprecated', @_);}
 
-sub _deprecated ($$)
+sub _deprecated
 {
   my ($this, $line) = @_;
   my @errors = ();
@@ -141,9 +141,9 @@ sub _deprecated ($$)
 
 # ----- Check: attributes --------------------------------------------------- #
 
-sub attributes ($@) { return shift->_wrap('_attributes', @_); }
+sub attributes { return shift->_wrap('_attributes', @_); }
 
-sub _attributes ($$)
+sub _attributes
 {
   my ($this, $line) = @_;
   return () unless $this->{_html};
@@ -365,9 +365,9 @@ sub _attributes ($$)
 
 # ----- Check: MIME types --------------------------------------------------- #
 
-sub mime_types ($@) { return shift->_wrap('_mime_types', @_); }
+sub mime_types { return shift->_wrap('_mime_types', @_); }
 
-sub _mime_types ($$)
+sub _mime_types
 {
   my ($this, $line) = @_;
   return () unless $this->{_html};
@@ -378,7 +378,7 @@ sub _mime_types ($$)
   my @errors = ();
   my $msg = 'bad media type: "%s"';
   my $jsmsg =
-    'unregistered media type: "%s", use application/x-javascript instead (see also CAVEATS in the HTML::GMUCK manual page)';
+    'not recommended media type: "%s", see RFC 4329 (and also CAVEATS in the HTML::GMUCK manual page)';
 
   foreach my $re (@MIME_Attrs) {
 
@@ -397,7 +397,7 @@ sub _mime_types ($$)
             );
       } elsif (lc($elem) eq 'script' &&
                $mtype =~ /(ecm|jav)ascript/io &&
-               lc($mtype) ne 'application/x-javascript') {
+               lc($mtype) !~ '^application/(ecm|jav)ascript$') {
         push(@errors, { col  => $pos,
                         type => 'W',
                         elem => $elem,
@@ -414,9 +414,9 @@ sub _mime_types ($$)
 
 # ----- Check: elements ----------------------------------------------------- #
 
-sub elements ($@) { return shift->_wrap('_elements', @_); }
+sub elements { return shift->_wrap('_elements', @_); }
 
-sub _elements ($$)
+sub _elements
 {
   my ($this, $line) = @_;
   return () unless $this->{_html};
@@ -558,9 +558,9 @@ sub _elements ($$)
 # ----- Check: entities ----------------------------------------------------- #
 
 # Check for unterminated entities in URIs (usually & instead of &amp;).
-sub entities ($@) { return shift->_wrap('_entities', @_);}
+sub entities { return shift->_wrap('_entities', @_);}
 
-sub _entities ($$)
+sub _entities
 {
   my ($this, $line) = @_;
   return () unless $this->{_html};
@@ -606,9 +606,9 @@ sub _entities ($$)
 # ----- Check: DOCTYPE ------------------------------------------------------ #
 
 # Check for doctype declaration errors.
-sub doctype ($@) { return shift->_wrap('_doctype', @_); }
+sub doctype { return shift->_wrap('_doctype', @_); }
 
-sub _doctype ($$)
+sub _doctype
 {
   my ($this, $line) = @_;
   my @errors = ();
@@ -671,7 +671,7 @@ sub _doctype ($$)
 
 # ---------- Accessors and mutators ----------------------------------------- #
 
-sub mode ($;$)
+sub mode
 {
   my ($this, $mode) = @_;
   if ($mode) {
@@ -701,7 +701,7 @@ sub mode ($;$)
   return $this->{_mode};
 }
 
-sub tab_width ($;$)
+sub tab_width
 {
   my ($this, $tw) = @_;
   if (defined($tw)) {
@@ -714,7 +714,7 @@ sub tab_width ($;$)
   return $this->{_tab_width};
 }
 
-sub min_attributes ($;$)
+sub min_attributes
 {
   my ($this, $minattr) = @_;
   if (defined($minattr)) {
@@ -728,13 +728,13 @@ sub min_attributes ($;$)
   return $this->{_min_attrs};
 }
 
-sub stats ($)
+sub stats
 {
   my $this = shift;
   return ($this->{_num_errors}, $this->{_num_warnings});
 }
 
-sub reset ($)
+sub reset
 {
   my $this = shift;
   my ($e, $w) = $this->stats();
@@ -743,7 +743,7 @@ sub reset ($)
   return ($e, $w);
 }
 
-sub quote ($;$)
+sub quote
 {
   my ($this, $q) = @_;
   if (defined($q)) {
@@ -760,14 +760,14 @@ sub quote ($;$)
   return $this->{_quote};
 }
 
-sub full_version ()
+sub full_version
 {
   return "HTML::GMUCK $VERSION";
 }
 
 # ---------- Utility methods ------------------------------------------------ #
 
-sub _pos ($$$)
+sub _pos
 {
   my ($this, $line, $pos) = @_;
   $pos = 0 unless (defined($pos) && $pos > 0);
@@ -780,7 +780,7 @@ sub _pos ($$$)
   return $pos;
 }
 
-sub _wrap ($$@)
+sub _wrap
 {
   my ($this, $method, @lines) = @_;
   my @errors = ();

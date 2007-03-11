@@ -1,12 +1,12 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.41.
+signed via the Module::Signature module, version 0.55.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
 
     % cpansign -v
 
-It would check each file's integrity, as well as the signature's
+It will check each file's integrity, as well as the signature's
 validity.  If "==> Signature verified OK! <==" is not displayed,
 the distribution may already have been compromised, and you should
 not run its Makefile.PL or Build.PL.
@@ -15,25 +15,25 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 5b0385313ddfbbbd37768199bc861c4ce16c0e2f BUGS
-SHA1 fe4254c09bd2101b41ed4171c970d068a3dcbfc3 ChangeLog
+SHA1 69d313acbfe7e28bd103434c44758fdbd55c8b17 ChangeLog
 SHA1 14c6d45b5756fe7a4c28a574f2e6977a69797976 MANIFEST
-SHA1 5e735f3a177de8b92367fbd56305a79b8e3ce841 META.yml
+SHA1 d761118311c29e8b91133cfefe04a13d127df44b META.yml
 SHA1 dfdf575507e1db16517e6c60dfc4e5ecfda5c0ce Makefile.PL
-SHA1 b2aa0bd95438cd6f605d4d5bfc94638df3330b1f README
+SHA1 3ddf3652b44b78b12b5ec8238be0f1e81bb75516 README
 SHA1 85dd58ca4acda0c40d2c0fd1d1593beab525fcc5 SPECS
 SHA1 dc968e7e3d3d1d6ca53505a8b4514285e152a648 TODO
-SHA1 9c4400ee6361cfc8c1c6d43585a9935bbcd2708f bin/gmuck
-SHA1 d968c7a5ead39f64e45816cd949810a261ae29ca bin/gmuck.pod
-SHA1 4e54a414c19809e2b265fbe95596b0f16e68079a etc/genregexps.PL
-SHA1 1b7cb906d6dc952256b36ac05514ac8e1d011770 etc/gmuck.spec
-SHA1 b25f3ccf8e9c489426366172c81fb086bca219e4 lib/HTML/GMUCK.pm
-SHA1 429cbbfe3cf02bd425763ad4cbfc98ff4c0e69ea lib/HTML/GMUCK.pod
-SHA1 808edea684b72041a67b8c20ef85f89a9e2ef070 lib/HTML/GMUCK/regexps.pl
+SHA1 e4eedefb7e24fec596b5716172db5f2c806ad7dd bin/gmuck
+SHA1 9d6ab7eecddc1ab64127728d90206fff9c51a5d1 bin/gmuck.pod
+SHA1 73242179090152b2e13fb50a5c6d8208839f5504 etc/genregexps.PL
+SHA1 5fd373c682523d21deb3f8653a0868fd6983cada etc/gmuck.spec
+SHA1 46456f230f12ff53f8b5a28a0ab2701d5eaa030a lib/HTML/GMUCK.pm
+SHA1 9c5dfced08acbbad8cf799280eb31e3feadc4181 lib/HTML/GMUCK.pod
+SHA1 b4ca5c1e10d61986732665538a17f6b7fa7c3c66 lib/HTML/GMUCK/regexps.pl
 SHA1 67f1dd5e1177ff0a5f07fce3fb6727fc028a4257 test.pl
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.2.4 (GNU/Linux)
+Version: GnuPG v1.4.6 (GNU/Linux)
 
-iD8DBQFBFXCL2YzWNbzSQcsRArOTAKCdIrxZhSb/w+/VmMcqBtxVAN5V4ACfcEQU
-fkrazAVEmefmsJ8QE9axqIA=
-=jr4s
+iD8DBQFF9C+l2YzWNbzSQcsRAjGgAKDcG7LLpcl8ZqzPNxxC9BpbWgY2oACfffGe
+MILWPCDPKSUR49WDf+qc6w8=
+=ceaD
 -----END PGP SIGNATURE-----

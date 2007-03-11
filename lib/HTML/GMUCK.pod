@@ -1,4 +1,4 @@
-$Id: GMUCK.pod,v 1.7 2004/08/07 23:31:29 scop Exp $
+$Id: GMUCK.pod,v 1.9 2007/03/11 16:16:42 scop Exp $
 
 =head1 NAME
 
@@ -223,18 +223,17 @@ Nothing at the moment.
 
 =head1 CAVEATS
 
-You may get errors about the JavaScript media type "text/javascript"
-being unregistered, and a recommendation to use "application/x-javascript"
-instead.  However, Microsoft Internet Explorer 6.0 has been reported not
-to execute "application/x-javascript" scripts.  If you are concerned about
-this, just use "text/javascript" and ignore the error.  See
-E<lt>http://www.robinlionheart.com/stds/html4/scripts.htmlE<gt>
-for a good explanation about this.  Earlier versions of IE don't seem to
-be affected.
+You may get warnings about script media types, and a recommendation to
+use something else for them.  However, some browsers, notably Microsoft
+Internet Explorer 6.0 has been reported not to execute scripts that use
+some of the recommended registered scripting media types.  See
+E<lt>http://www.rfc-editor.org/rfc/rfc4329.txtE<gt> and
+E<lt>http://www.robinlionheart.com/stds/html4/scripts.htmlE<gt> for more
+information.  If this is a concern, one solution is to use some of the
+media types marked as obsolete in RFC 4329 for interoperability purposes
+and ignore related messages from gmuck.
 
 =head1 BUGS
-
-This tool should have existed many years ago.
 
 Due to the impossible task of this tool, there are and will be bugs,
 lots of them.  There is a thin line between reporting lots of bogus
@@ -270,7 +269,7 @@ Ville Skyttä E<lt>ville.skytta at iki.fiE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2004 Ville Skyttä.  All rights reserved.
+Copyright (C) 2001-2007 Ville Skyttä.  All rights reserved.
 
 This program is free software, you can redistribute it and/or modify
 it under the terms of The Artistic License or the GNU General Public

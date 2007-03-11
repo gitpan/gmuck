@@ -1,3 +1,17 @@
+2007-03-11  Ville Skyttä  <ville.skytta at iki.fi>
+
+	* Release 1.11.
+
+	* lib/HTML/GMUCK.*: Align warnings about scripting media types
+	with RFC 4329.
+
+	* etc/genregexps.PL: Output version of Regex::PreSuf in use.
+
+	* lib/HTML/GMUCK/regexps.pl: Regenerate with Regex::PreSuf 1.17.
+
+	*: bin/gmuck, etc/genregexps.PL, lib/HTML/GMUCK.pm: Cleanups
+	suggested by Perl::Critic.
+
 2004-08-08  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* Release 1.10.

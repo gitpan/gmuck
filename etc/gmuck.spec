@@ -1,22 +1,21 @@
-# $Id: gmuck.spec,v 1.14 2004/08/08 00:05:30 scop Exp $
+# $Id: gmuck.spec,v 1.15 2007/03/11 16:34:06 scop Exp $
 
 %{!?perl_vendorlib: %define perl_vendorlib %(eval "`%{__perl} -V:installvendorlib`"; echo $installvendorlib)}
 
 Name:           gmuck
-Version:        1.10
+Version:        1.11
 Release:        1
-Epoch:          0
 Summary:        gmuck, the Generated MarkUp ChecKer
 
 License:        GPL or Artistic
 Group:          Development/Tools
 Vendor:         Ville Skyttä <ville.skytta@iki.fi>
 URL:            http://gmuck.sourceforge.net/
-Source:         http://download.sourceforge.net/gmuck/gmuck-1.10.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Source:         http://download.sourceforge.net/gmuck/gmuck-%{version}.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildArch:      noarch
-BuildRequires:  perl >= 1:5.6.1
+BuildRequires:  perl >= 1:5.6.1, perl(ExtUtils::MakeMaker)
 
 %description
 gmuck assists you in generating valid (X)HTML by examining the source code
@@ -38,7 +37,7 @@ make %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make pure_install PERL_INSTALL_ROOT=$RPM_BUILD_ROOT
 find $RPM_BUILD_ROOT -type f -name .packlist -exec rm -f {} ';'
-find $RPM_BUILD_ROOT -type d -depth -exec rmdir {} 2>/dev/null ';'
+find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null ';'
 chmod -R u+w $RPM_BUILD_ROOT/*
 
 
@@ -54,12 +53,15 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc BUGS ChangeLog README SPECS TODO
 %{_bindir}/gmuck
-%{perl_vendorlib}/HTML
+%{perl_vendorlib}/HTML/
 %{_mandir}/man[13]/*.[13]*
 
 
 %changelog
-* Sun Aug  8 2004 Ville Skyttä <ville.skytta at iki.fi> - 0:1.10-1
+* Sun Mar 11 2007 Ville Skyttä <ville.skytta at iki.fi> - 1.11-1
+- 1.11.
+
+* Sun Aug  8 2004 Ville Skyttä <ville.skytta at iki.fi> - 1.10-1
 - Update to 1.10.
 - Install into vendor install dirs.
 
