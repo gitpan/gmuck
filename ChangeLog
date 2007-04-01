@@ -1,3 +1,15 @@
+2007-04-01  Ville Skyttä  <ville.skytta at iki.fi>
+
+	* Release 1.12.
+
+	* etc/genregexps.PL, lib/HTML/GMUCK.pm: Bring valid values of
+	width and height of td and th up to date with XHTML 1.0 2nd ed.
+
+	* etc/genregexps.PL, lib/HTML/GMUCK.pm: Check fixed attribute
+	values case sensitively in XHTML.
+
+	* etc/genregexps.PL: Fix valid values for hr/@align.
+
 2007-03-11  Ville Skyttä  <ville.skytta at iki.fi>
 
 	* Release 1.11.
@@ -7,9 +19,7 @@
 
 	* etc/genregexps.PL: Output version of Regex::PreSuf in use.
 
-	* lib/HTML/GMUCK/regexps.pl: Regenerate with Regex::PreSuf 1.17.
-
-	*: bin/gmuck, etc/genregexps.PL, lib/HTML/GMUCK.pm: Cleanups
+	* bin/gmuck, etc/genregexps.PL, lib/HTML/GMUCK.pm: Cleanups
 	suggested by Perl::Critic.
 
 2004-08-08  Ville Skyttä  <ville.skytta at iki.fi>

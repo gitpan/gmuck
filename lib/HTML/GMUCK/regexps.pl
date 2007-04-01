@@ -123,7 +123,6 @@ $Depr_Elems = '\b(?:(?:applet|basefont|center|dir|font|isindex|menu|strike|[su])
    sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, 'hr', 'size'),
    sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, '\b(?:(?:img|table))\b', 'border'), # img: HTML 4
    sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, 'object', '\b(?:(?:border|hspace|vspace))\b'),
-   sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, '\b(?:t[dh])\b', '\b(?:(?:height|width))\b'), # XHTML 1.0
   );
 
 # Attributes whose value is %Length, from HTML 4.01 and XHTML 1.0.
@@ -132,47 +131,46 @@ $Depr_Elems = '\b(?:(?:applet|basefont|center|dir|font|isindex|menu|strike|[su])
   map { qr/$_/i }
   ( sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, 'table', '\b(?:cell(?:padd|spac)ing)\b'),
     sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, '\b(?:(?:col(?:group)?|t(?:body|foot|head|[dhr])))\b', 'charoff'),
-    sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, '\b(?:(?:applet|i(?:frame|mg)|object))\b', 'height'),
-    sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, '\b(?:(?:applet|hr|i(?:frame|mg)|object|table))\b', 'width'),
-    sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, '\b(?:t[dh])\b', '\b(?:(?:height|width))\b'), # HTML 4
+    sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, '\b(?:(?:applet|i(?:frame|mg)|object|t[dh]))\b', 'height'),
+    sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, '\b(?:(?:applet|hr|i(?:frame|mg)|object|t(?:able|[dh])))\b', 'width'),
     sprintf(q{<((%s)\b\s??[^>]*?\s(%s)=(["'])([^>]+?)\4)}, 'img', 'border'), # XHTML 1.0
   );
 
 # Attributes that have a fixed set of values, from HTML 4.01.
 @Fixed_Attrs = ();
-push(@Fixed_Attrs, [ qr/<((hr)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:center|justify|left))\b/i, 'left|center|justify' ]);
-push(@Fixed_Attrs, [ qr/<((input)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:button|checkbox|file|hidden|image|password|r(?:adio|eset)|submit|text))\b/i, 'text|password|checkbox|radio|submit|reset|file|hidden|image|button' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:(?:applet|i(?:frame|mg|nput)|object))\b)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:bottom|left|middle|right|top))\b/i, 'top|middle|bottom|left|right' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:i?frame)\b)\b\s??[^>]*?\s(frameborder)=(["'])([^>]+?)\4)/i, qr/\b(?:[01])\b/i, '0|1' ]);
-push(@Fixed_Attrs, [ qr/<((button)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:button|reset|submit))\b/i, 'button|submit|reset' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:i(?:mg|nput))\b)\b\s??[^>]*?\s(ismap)=(["'])([^>]+?)\4)/i, qr/\b(?:ismap)\b/i, 'ismap' ]);
-push(@Fixed_Attrs, [ qr/<((object)\b\s??[^>]*?\s(declare)=(["'])([^>]+?)\4)/i, qr/\b(?:declare)\b/i, 'declare' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:i?frame)\b)\b\s??[^>]*?\s(scrolling)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:auto|no|yes))\b/i, 'yes|no|auto' ]);
-push(@Fixed_Attrs, [ qr/<((ol)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, qr/\b(?:[1AIai])\b/i, '1|a|A|i|I' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:(?:div|h[123456]|p))\b)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:center|justify|left|right))\b/i, 'left|center|right|justify' ]);
-push(@Fixed_Attrs, [ qr/<((table)\b\s??[^>]*?\s(rules)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:all|cols|groups|none|rows))\b/i, 'none|groups|rows|cols|all' ]);
-push(@Fixed_Attrs, [ qr/<((input)\b\s??[^>]*?\s(checked)=(["'])([^>]+?)\4)/i, qr/\b(?:checked)\b/i, 'checked' ]);
-push(@Fixed_Attrs, [ qr/<((param)\b\s??[^>]*?\s(valuetype)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:DATA|OBJECT|REF))\b/i, 'DATA|REF|OBJECT' ]);
-push(@Fixed_Attrs, [ qr/<((script)\b\s??[^>]*?\s(defer)=(["'])([^>]+?)\4)/i, qr/\b(?:defer)\b/i, 'defer' ]);
-push(@Fixed_Attrs, [ qr/<((table)\b\s??[^>]*?\s(frame)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:above|b(?:elow|o(?:rder|x))|hsides|lhs|rhs|v(?:oid|sides)))\b/i, 'void|above|below|hsides|lhs|rhs|vsides|box|border' ]);
-push(@Fixed_Attrs, [ qr/<((br)\b\s??[^>]*?\s(clear)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:all|left|none|right))\b/i, 'left|all|right|none' ]);
-push(@Fixed_Attrs, [ qr/<((ul)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:circle|disc|square))\b/i, 'disc|square|circle' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:(?:pre|s(?:cript|tyle)))\b)\b\s??[^>]*?\s(xml:space)=(["'])([^>]+?)\4)/i, qr/\b(?:preserve)\b/i, 'preserve' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:(?:col(?:group)?|t(?:body|foot|head|[dhr])))\b)\b\s??[^>]*?\s(valign)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:b(?:aseline|ottom)|middle|top))\b/i, 'top|middle|bottom|baseline' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:a(?:rea)?)\b)\b\s??[^>]*?\s(shape)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:circle|default|poly|rect))\b/i, 'rect|circle|poly|default' ]);
-push(@Fixed_Attrs, [ qr/<((li)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:circle|disc|square|[1AIai]))\b/i, 'disc|square|circle|1|a|A|i|I' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:(?:d(?:ir|l)|menu|ol|ul))\b)\b\s??[^>]*?\s(compact)=(["'])([^>]+?)\4)/i, qr/\b(?:compact)\b/i, 'compact' ]);
-push(@Fixed_Attrs, [ qr/<((table)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:center|left|right))\b/i, 'left|center|right' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:(?:button|input|opt(?:group|ion)|select|textarea))\b)\b\s??[^>]*?\s(disabled)=(["'])([^>]+?)\4)/i, qr/\b(?:disabled)\b/i, 'disabled' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:(?:input|textarea))\b)\b\s??[^>]*?\s(readonly)=(["'])([^>]+?)\4)/i, qr/\b(?:readonly)\b/i, 'readonly' ]);
-push(@Fixed_Attrs, [ qr/<((form)\b\s??[^>]*?\s(method)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:ge|pos)t)\b/i, 'get|post' ]);
-push(@Fixed_Attrs, [ qr/<((html)\b\s??[^>]*?\s(xmlns)=(["'])([^>]+?)\4)/i, qr/\b(?:http\:\/\/www\.w3\.org\/1999\/xhtml)\b/i, 'http://www.w3.org/1999/xhtml' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:(?:col(?:group)?|t(?:body|foot|head|[dhr])))\b)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:c(?:ente|ha)r|justify|left|right))\b/i, 'left|center|right|justify|char' ]);
-push(@Fixed_Attrs, [ qr/<((hr)\b\s??[^>]*?\s(noshade)=(["'])([^>]+?)\4)/i, qr/\b(?:noshade)\b/i, 'noshade' ]);
-push(@Fixed_Attrs, [ qr/<((frame)\b\s??[^>]*?\s(noresize)=(["'])([^>]+?)\4)/i, qr/\b(?:noresize)\b/i, 'noresize' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:t[dh])\b)\b\s??[^>]*?\s(nowrap)=(["'])([^>]+?)\4)/i, qr/\b(?:nowrap)\b/i, 'nowrap' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:t[dh])\b)\b\s??[^>]*?\s(scope)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:col(?:group)?|row(?:group)?))\b/i, 'row|col|rowgroup|colgroup' ]);
-push(@Fixed_Attrs, [ qr/<((area)\b\s??[^>]*?\s(nohref)=(["'])([^>]+?)\4)/i, qr/\b(?:nohref)\b/i, 'nohref' ]);
-push(@Fixed_Attrs, [ qr/<((\b(?:(?:caption|legend))\b)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, qr/\b(?:(?:bottom|left|right|top))\b/i, 'top|bottom|left|right' ]);
+push(@Fixed_Attrs, [ qr/<((hr)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, '\b(?:(?:center|left|right))\b', 'left|center|right' ]);
+push(@Fixed_Attrs, [ qr/<((input)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, '\b(?:(?:button|checkbox|file|hidden|image|password|r(?:adio|eset)|submit|text))\b', 'text|password|checkbox|radio|submit|reset|file|hidden|image|button' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:(?:applet|i(?:frame|mg|nput)|object))\b)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, '\b(?:(?:bottom|left|middle|right|top))\b', 'top|middle|bottom|left|right' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:i?frame)\b)\b\s??[^>]*?\s(frameborder)=(["'])([^>]+?)\4)/i, '\b(?:[01])\b', '0|1' ]);
+push(@Fixed_Attrs, [ qr/<((button)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, '\b(?:(?:button|reset|submit))\b', 'button|submit|reset' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:i(?:mg|nput))\b)\b\s??[^>]*?\s(ismap)=(["'])([^>]+?)\4)/i, '\b(?:ismap)\b', 'ismap' ]);
+push(@Fixed_Attrs, [ qr/<((object)\b\s??[^>]*?\s(declare)=(["'])([^>]+?)\4)/i, '\b(?:declare)\b', 'declare' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:i?frame)\b)\b\s??[^>]*?\s(scrolling)=(["'])([^>]+?)\4)/i, '\b(?:(?:auto|no|yes))\b', 'yes|no|auto' ]);
+push(@Fixed_Attrs, [ qr/<((ol)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, '\b(?:[1AIai])\b', '1|a|A|i|I' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:(?:div|h[123456]|p))\b)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, '\b(?:(?:center|justify|left|right))\b', 'left|center|right|justify' ]);
+push(@Fixed_Attrs, [ qr/<((table)\b\s??[^>]*?\s(rules)=(["'])([^>]+?)\4)/i, '\b(?:(?:all|cols|groups|none|rows))\b', 'none|groups|rows|cols|all' ]);
+push(@Fixed_Attrs, [ qr/<((input)\b\s??[^>]*?\s(checked)=(["'])([^>]+?)\4)/i, '\b(?:checked)\b', 'checked' ]);
+push(@Fixed_Attrs, [ qr/<((param)\b\s??[^>]*?\s(valuetype)=(["'])([^>]+?)\4)/i, '\b(?:(?:data|object|ref))\b', 'data|ref|object' ]);
+push(@Fixed_Attrs, [ qr/<((script)\b\s??[^>]*?\s(defer)=(["'])([^>]+?)\4)/i, '\b(?:defer)\b', 'defer' ]);
+push(@Fixed_Attrs, [ qr/<((table)\b\s??[^>]*?\s(frame)=(["'])([^>]+?)\4)/i, '\b(?:(?:above|b(?:elow|o(?:rder|x))|hsides|lhs|rhs|v(?:oid|sides)))\b', 'void|above|below|hsides|lhs|rhs|vsides|box|border' ]);
+push(@Fixed_Attrs, [ qr/<((br)\b\s??[^>]*?\s(clear)=(["'])([^>]+?)\4)/i, '\b(?:(?:all|left|none|right))\b', 'left|all|right|none' ]);
+push(@Fixed_Attrs, [ qr/<((ul)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, '\b(?:(?:circle|disc|square))\b', 'disc|square|circle' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:(?:pre|s(?:cript|tyle)))\b)\b\s??[^>]*?\s(xml:space)=(["'])([^>]+?)\4)/i, '\b(?:preserve)\b', 'preserve' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:(?:col(?:group)?|t(?:body|foot|head|[dhr])))\b)\b\s??[^>]*?\s(valign)=(["'])([^>]+?)\4)/i, '\b(?:(?:b(?:aseline|ottom)|middle|top))\b', 'top|middle|bottom|baseline' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:a(?:rea)?)\b)\b\s??[^>]*?\s(shape)=(["'])([^>]+?)\4)/i, '\b(?:(?:circle|default|poly|rect))\b', 'rect|circle|poly|default' ]);
+push(@Fixed_Attrs, [ qr/<((li)\b\s??[^>]*?\s(type)=(["'])([^>]+?)\4)/i, '\b(?:(?:circle|disc|square|[1AIai]))\b', 'disc|square|circle|1|a|A|i|I' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:(?:d(?:ir|l)|menu|ol|ul))\b)\b\s??[^>]*?\s(compact)=(["'])([^>]+?)\4)/i, '\b(?:compact)\b', 'compact' ]);
+push(@Fixed_Attrs, [ qr/<((table)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, '\b(?:(?:center|left|right))\b', 'left|center|right' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:(?:button|input|opt(?:group|ion)|select|textarea))\b)\b\s??[^>]*?\s(disabled)=(["'])([^>]+?)\4)/i, '\b(?:disabled)\b', 'disabled' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:(?:input|textarea))\b)\b\s??[^>]*?\s(readonly)=(["'])([^>]+?)\4)/i, '\b(?:readonly)\b', 'readonly' ]);
+push(@Fixed_Attrs, [ qr/<((form)\b\s??[^>]*?\s(method)=(["'])([^>]+?)\4)/i, '\b(?:(?:ge|pos)t)\b', 'get|post' ]);
+push(@Fixed_Attrs, [ qr/<((html)\b\s??[^>]*?\s(xmlns)=(["'])([^>]+?)\4)/i, '\b(?:http\:\/\/www\.w3\.org\/1999\/xhtml)\b', 'http://www.w3.org/1999/xhtml' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:(?:col(?:group)?|t(?:body|foot|head|[dhr])))\b)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, '\b(?:(?:c(?:ente|ha)r|justify|left|right))\b', 'left|center|right|justify|char' ]);
+push(@Fixed_Attrs, [ qr/<((hr)\b\s??[^>]*?\s(noshade)=(["'])([^>]+?)\4)/i, '\b(?:noshade)\b', 'noshade' ]);
+push(@Fixed_Attrs, [ qr/<((frame)\b\s??[^>]*?\s(noresize)=(["'])([^>]+?)\4)/i, '\b(?:noresize)\b', 'noresize' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:t[dh])\b)\b\s??[^>]*?\s(nowrap)=(["'])([^>]+?)\4)/i, '\b(?:nowrap)\b', 'nowrap' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:t[dh])\b)\b\s??[^>]*?\s(scope)=(["'])([^>]+?)\4)/i, '\b(?:(?:col(?:group)?|row(?:group)?))\b', 'row|col|rowgroup|colgroup' ]);
+push(@Fixed_Attrs, [ qr/<((area)\b\s??[^>]*?\s(nohref)=(["'])([^>]+?)\4)/i, '\b(?:nohref)\b', 'nohref' ]);
+push(@Fixed_Attrs, [ qr/<((\b(?:(?:caption|legend))\b)\b\s??[^>]*?\s(align)=(["'])([^>]+?)\4)/i, '\b(?:(?:bottom|left|right|top))\b', 'top|bottom|left|right' ]);
 
 1;

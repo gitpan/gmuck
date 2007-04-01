@@ -209,7 +209,7 @@ EOF
 
 $tmp = '<((%%s)\b\s??[^>]*?\s(%%s)=(["\'])([^>]+?)\4)';
 
-printf <<EOF, make_re(qw(cols rows)), make_re(qw(td th)), make_re(qw(colspan rowspan)), make_re(qw(col colgroup)), make_re(qw(a area button input object select textarea)), make_re(qw(applet img)), make_re(qw(hspace vspace)), make_re(qw(frame iframe)), make_re(qw(marginheight marginwidth)), make_re(qw(img table)), make_re(qw(border hspace vspace)), make_re(qw(td th)), make_re(qw(width height));
+printf <<EOF, make_re(qw(cols rows)), make_re(qw(td th)), make_re(qw(colspan rowspan)), make_re(qw(col colgroup)), make_re(qw(a area button input object select textarea)), make_re(qw(applet img)), make_re(qw(hspace vspace)), make_re(qw(frame iframe)), make_re(qw(marginheight marginwidth)), make_re(qw(img table)), make_re(qw(border hspace vspace));
 
 # Attributes whose value is an integer, from HTML 4.01 and XHTML 1.0.
 # A couple of special cases here, handled in _attributes().
@@ -232,12 +232,11 @@ printf <<EOF, make_re(qw(cols rows)), make_re(qw(td th)), make_re(qw(colspan row
    sprintf(q{$tmp}, 'hr', 'size'),
    sprintf(q{$tmp}, '%s', 'border'), # img: HTML 4
    sprintf(q{$tmp}, 'object', '%s'),
-   sprintf(q{$tmp}, '%s', '%s'), # XHTML 1.0
   );
 
 EOF
 
-printf <<EOF, make_re(qw(cellpadding cellspacing)), make_re(qw(col colgroup tbody td tfoot th thead tr)), make_re(qw(applet iframe img object)), make_re(qw(applet hr iframe img object table)), make_re(qw(td th)), make_re(qw(width height));
+printf <<EOF, make_re(qw(cellpadding cellspacing)), make_re(qw(col colgroup tbody td tfoot th thead tr)), make_re(qw(applet iframe img object td th)), make_re(qw(applet hr iframe img object table td th));
 # Attributes whose value is %%Length, from HTML 4.01 and XHTML 1.0.
 # Some special cases here, handled in _attributes().
 \@Length_Attrs =
@@ -246,7 +245,6 @@ printf <<EOF, make_re(qw(cellpadding cellspacing)), make_re(qw(col colgroup tbod
     sprintf(q{$tmp}, '%s', 'charoff'),
     sprintf(q{$tmp}, '%s', 'height'),
     sprintf(q{$tmp}, '%s', 'width'),
-    sprintf(q{$tmp}, '%s', '%s'), # HTML 4
     sprintf(q{$tmp}, 'img', 'border'), # XHTML 1.0
   );
 
@@ -277,7 +275,7 @@ $tmp =~ s/%%/%/g;
     sprintf($tmp, make_re(qw(frame iframe)), 'frameborder') => [ qw(0 1) ],
     sprintf($tmp, make_re(qw(frame iframe)), 'scrolling') =>
     [ qw(yes no auto) ],
-    sprintf($tmp, 'hr', 'align') => [ qw(left center justify) ],
+    sprintf($tmp, 'hr', 'align') => [ qw(left center right) ],
     sprintf($tmp, 'hr', 'noshade') => [ 'noshade' ],
     sprintf($tmp, make_re(qw(img input)), 'ismap') => [ 'ismap' ],
     sprintf($tmp, 'input', 'checked') => [ 'checked' ],
@@ -286,7 +284,7 @@ $tmp =~ s/%%/%/g;
     sprintf($tmp, 'li', 'type') => [ qw(disc square circle 1 a A i I) ],
     sprintf($tmp, 'object', 'declare') => [ 'declare' ],
     sprintf($tmp, 'ol', 'type') => [ qw(1 a A i I) ],
-    sprintf($tmp, 'param', 'valuetype') => [ qw(DATA REF OBJECT) ],
+    sprintf($tmp, 'param', 'valuetype') => [ qw(data ref object) ],
     sprintf($tmp, 'script', 'defer') => [ 'defer' ],
     sprintf($tmp, 'table', 'align') => [ qw(left center right) ],
     sprintf($tmp, 'table', 'frame') =>
@@ -310,7 +308,7 @@ EOF
 while (my ($re, $vals) = each(%tmp)) {
   my $v = make_re(@$vals);
   printf <<'EOF', $re, $v, join('|', @$vals);
-push(@Fixed_Attrs, [ qr/%s/i, qr/%s/i, '%s' ]);
+push(@Fixed_Attrs, [ qr/%s/i, '%s', '%s' ]);
 EOF
 }
 

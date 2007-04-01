@@ -1,6 +1,6 @@
 package HTML::GMUCK;
 
-# $Id: GMUCK.pm,v 1.22 2007/03/11 16:16:42 scop Exp $
+# $Id: GMUCK.pm,v 1.24 2007/04/01 20:26:55 scop Exp $
 
 use strict;
 
@@ -19,7 +19,7 @@ no warnings 'utf8';
 BEGIN
 {
 
-  $VERSION = sprintf("%d.%02d", q$Revision: 1.22 $ =~ /(\d+)\.(\d+)/);
+  $VERSION = sprintf("%d.%02d", q$Revision: 1.24 $ =~ /(\d+)\.(\d+)/);
 
   # --- Preload regexps.
 
@@ -217,11 +217,6 @@ sub _attributes
           $val !~ /[\\\$\(\[]/o   # bogus protection
          ) {
 
-        # Special case: td,th->width,height only in XHTML
-        next if (! $this->{_xhtml} &&
-                 ($lel  eq 'td'    || $lel  eq 'th') &&
-                 ($latt eq 'width' || $latt eq 'height'));
-
         # Special case: img->border only in HTML 4
         next if ($this->{_xhtml} && $lel eq 'img' && $latt eq 'border');
 
@@ -266,6 +261,7 @@ sub _attributes
   foreach (@Fixed_Attrs) {
 
     my ($re, $vre, $vals) = @$_;
+    $vre = $this->{_xml} ? qr/$vre/ : qr/$vre/i;
     my $msg = 'invalid value: "%s", should be %s"%s"';
 
     while ($line =~ /$re/g) {

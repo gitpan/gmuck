@@ -1,9 +1,9 @@
-# $Id: gmuck.spec,v 1.15 2007/03/11 16:34:06 scop Exp $
+# $Id: gmuck.spec,v 1.16 2007/04/01 20:41:05 scop Exp $
 
 %{!?perl_vendorlib: %define perl_vendorlib %(eval "`%{__perl} -V:installvendorlib`"; echo $installvendorlib)}
 
 Name:           gmuck
-Version:        1.11
+Version:        1.12
 Release:        1
 Summary:        gmuck, the Generated MarkUp ChecKer
 
